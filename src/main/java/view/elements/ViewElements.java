@@ -96,6 +96,7 @@ public class ViewElements {
                 JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
                 JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED
         );
+        scrollPane.getVerticalScrollBar().setUnitIncrement(20);
         scrollPane.setBorder(
                 BorderFactory.createCompoundBorder(
                         new EmptyBorder(1, 1, 1, 1),
@@ -116,8 +117,7 @@ public class ViewElements {
     }
 
     private static JTextField createJTextField() {
-        JTextField viewTextView = new JTextField();
-        return viewTextView;
+        return new JTextField();
     }
 
     private static JButton createJButton() {

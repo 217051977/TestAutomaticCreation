@@ -70,4 +70,8 @@ public class RunElement extends ViewElements {
         runButton.doClick();
     }
 
+    public void clearOutputArea() {
+        output = "";
+    }
+
 }

@@ -244,7 +244,12 @@ public class FormManager implements
                     toAdd += combinationPrefix;
                 }
                 List<String> combination = new ArrayList<>(List.of(toAdd + variable1.getName()));
-                getCombinations(combinations, combination, variableSize, 1);
+                if (variableSize > 1) {
+                    getCombinations(combinations, combination, variableSize, 1);
+                } else {
+                    combinations.add(combination);
+                }
+
             }
             System.out.println(combinations);
             for (List<String> combinationList: combinations) {
@@ -343,6 +348,31 @@ public class FormManager implements
         );
     }
 
+    private int getCombinationFound(String name) {
+        String[] namePartsSplitByBody = name.split("_body");
+        if (namePartsSplitByBody.length > 0) {
+            String namePart0SplitByBody = namePartsSplitByBody[0];
+            String[] namePart0SplitByBodyAndUnderscore = namePart0SplitByBody.split("_");
+
+            for (int i = namePart0SplitByBodyAndUnderscore.length - 1; i >= 0; i--) {
+                switch (namePart0SplitByBodyAndUnderscore[i]) {
+                    case "empty":
+                        return 1;
+                    case "invalid":
+                        return 2;
+                    case "missing":
+                        return 0;
+                    case "valid":
+                        return 3;
+                }
+            }
+            return -2;
+        } else {
+            return -1;
+        }
+
+    }
+
     @Override
     public void endpointFolderFinderResponse(
             String response,
@@ -354,18 +384,44 @@ public class FormManager implements
         printMessage.printMessage(response, pauseTimeResponse);
         for (Endpoint endpoint : endpoints) {
             if (name.contains(endpoint.getName())) {
-                if (name.contains("body")) {
+                //-2 ERROR, -1 - not have body, 0 - missing, 1 - empty, 2 - invalid, 3 - valid
+                int combinationFound = getCombinationFound(name);
+                if (combinationFound != -1 && combinationFound != 0) {
                     printMessage.printMessage("Creating body file to endpoint " + name.toUpperCase() + "...", pauseTimeCommand);
-                    EndpointBodyCreator.getEndpointBodyCreator(
-                            this,
-                            this,
-                            featureFolderPath,
-                            endpointFolderPath,
-                            name,
-                            endpoint.getValidBody(),
-                            endpoint.getValidHeaders(),
-                            lastFolder
-                    );
+                    if (combinationFound == 1) {
+                        EndpointBodyCreator.getEndpointBodyCreator(
+                                this,
+                                this,
+                                featureFolderPath,
+                                endpointFolderPath,
+                                name,
+                                "{}",
+                                endpoint.getValidHeaders(),
+                                lastFolder
+                        );
+                    } else if (combinationFound == 2) {
+                        EndpointBodyCreator.getEndpointBodyCreator(
+                                this,
+                                this,
+                                featureFolderPath,
+                                endpointFolderPath,
+                                name,
+                                "{\n    \"asdasdasd\": \"asdasdasd\"\n}",
+                                endpoint.getValidHeaders(),
+                                lastFolder
+                        );
+                    } else if (combinationFound == 3) {
+                        EndpointBodyCreator.getEndpointBodyCreator(
+                                this,
+                                this,
+                                featureFolderPath,
+                                endpointFolderPath,
+                                name,
+                                endpoint.getValidBody(),
+                                endpoint.getValidHeaders(),
+                                lastFolder
+                        );
+                    }
                 } else {
                     printMessage.printMessage("Creating headers file to endpoint " + name.toUpperCase() + "...", pauseTimeCommand);
                     EndpointHeadersCreator.getEndpointHeadersCreator(

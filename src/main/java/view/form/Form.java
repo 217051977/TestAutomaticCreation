@@ -82,13 +82,12 @@ public final class Form extends ViewElements implements
         setFeatureFileNameChangeEvent();
         if (runTestCode == 1 || runTestCode == 2) {
             runElement.startTest();
-        } else if (runTestCode == 0) {
-
         }
     }
 
     @Override
     public void runButtonPressedResponse() {
+        runElement.clearOutputArea();
         printMessage("Start processing...", 750);
         printMessage("Checking if base folder exists...", 1000);
         if (runTestCode == 0) {
@@ -115,31 +114,62 @@ public final class Form extends ViewElements implements
         baseFolderElement.setBaseFolderPath("D:\\Users\\nb27853\\omni-qa-pluma-test");
         featureElements.forEach(
                 featureElement -> {
-                    featureElement.setFeatureFileName("cms_opc_test");
-                    featureElement.setFeatureName("this is the feature - name");
-                    featureElement.setFeatureBaseEndpoint("https://delivery-digitaljourney.westeurope.cloudapp.azure.com/bin/mvc.do/operationconsole/v3/roles");
-                    featureElement.setFeatureTags("@cms @opc @test");
+                    featureElement.setFeatureFileName("cms_opc_permissions");
+                    featureElement.setFeatureName("cms ocp permissions");
+                    featureElement.setFeatureBaseEndpoint("https://delivery-digitaljourney.westeurope.cloudapp.azure.com/bin/mvc.do/operationconsole/v3/permissions");
+                    featureElement.setFeatureTags("@cms @opc @permissions");
                 }
         );
         featureEndpointElements.forEach(
                 featureEndpointElement -> {
-                    featureEndpointElement.setEndpointName("endpoint_test");
-                    featureEndpointElement.setEndpointRemainUrl("/variable_test");
+                    featureEndpointElement.setEndpointForFeature("cms_opc_permissions");
+                    featureEndpointElement.setEndpointName("get_search_for_permissions_given_a_query");
+                    featureEndpointElement.setEndpointRemainUrl("/query?expression&limit&sort");
                     featureEndpointElement.setEndpointRequestType("GET");
                     featureEndpointElement.setEndpointValidBody(
                             "{\n" +
-                                    "    \"id\": \"1\",\n" +
-                                    "    \"name\": \"Bruno\",\n" +
-                                    "    \"description\": \"This is the body for this program self populating values for testing!\"\n" +
+                                    "    \"name\": \"permission_temp\"\n" +
                                     "}"
                     );
                     featureEndpointElement.setEndpointValidHeaders(
                             "accept: application/json\n" +
-                                    "authorization: Bearer $var_bearer_token_invalid_user\n" +
+                                    "authorization: Bearer $var_bearer_token_user\n" +
                                     "Content-Type: application/json"
                     );
                 }
         );
+        int nVar = 3;
+        if (featureEndpointVariableElements.size() < nVar) {
+            for (int i = 0; i < nVar; i++) {
+                addFeatureEndpointVariable.doClick();
+            }
+        } else if (featureEndpointVariableElements.size() > nVar) {
+            int size = featureEndpointVariableElements.size();
+            for (int i = 0; i < size - nVar; i++){
+                removeFeatureEndpointVariable.doClick();
+            }
+        }
+        for (int i = 0; i < nVar; i++) {
+            featureEndpointVariableElements.get(i).setVariableForEndpoint("get_search_for_permissions_given_a_query");
+            switch (i) {
+                case 0: {
+                    featureEndpointVariableElements.get(i).setVariableName("expression");
+                    featureEndpointVariableElements.get(i).setVariableValue("name==$cms_opc_permission_name");
+                }break;
+                case 1: {
+                    featureEndpointVariableElements.get(i).setVariableName("limit");
+                    featureEndpointVariableElements.get(i).setVariableValue("1");
+                }break;
+                default: {
+                    featureEndpointVariableElements.get(i).setVariableName("sort");
+                    featureEndpointVariableElements.get(i).setVariableValue("asc");
+                }
+            }
+            featureEndpointVariableElements.get(i).setVariableIsInUrl(false);
+            featureEndpointVariableElements.get(i).setVariableCombinationsEmpty(true);
+            featureEndpointVariableElements.get(i).setVariableCombinationsInvalid(true);
+            featureEndpointVariableElements.get(i).setVariableCombinationsMissing(true);
+        }
 
     }
 
@@ -414,21 +444,25 @@ public final class Form extends ViewElements implements
     }
 
     private void prepareToDrawFeatureElementTab(GroupLayout layout) {
-        JScrollPane scrollPane = new JScrollPane(featureElementsPanel);
-        scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        JScrollPane scrollPane = getScrollPane(featureElementsPanel);
         drawElementTab(layout, featureLabel, removeFeature, addFeature, scrollPane);
     }
 
     private void prepareToDrawFeatureEndpointElementTab(GroupLayout layout) {
-        JScrollPane scrollPane = new JScrollPane(featureEndpointElementsPanel);
-        scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        JScrollPane scrollPane = getScrollPane(featureEndpointElementsPanel);
         drawElementTab(layout, featureEndpointLabel, removeFeatureEndpoint, addFeatureEndpoint, scrollPane);
     }
 
     private void prepareToDrawFeatureEndpointVariableElementTab(GroupLayout layout) {
-        JScrollPane scrollPane = new JScrollPane(featureEndpointVariableElementsPanel);
-        scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        JScrollPane scrollPane = getScrollPane(featureEndpointVariableElementsPanel);
         drawElementTab(layout, featureEndpointVariableLabel, removeFeatureEndpointVariable, addFeatureEndpointVariable, scrollPane);
+    }
+
+    private JScrollPane getScrollPane(JPanel panel) {
+        JScrollPane scrollPane = new JScrollPane(panel);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        scrollPane.getVerticalScrollBar().setUnitIncrement(10);
+        return scrollPane;
     }
 
     private void drawElementTab(

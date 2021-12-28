@@ -53,18 +53,73 @@ public class FeatureDataCreator {
             String endpointName = endpoint.getName();
             for (String path : paths) {
                 if (path.contains(endpointName)) {
-                    String endpointRemainingUrl = endpoint.getRemainingUrl();
+                    StringBuilder endpointRemainingUrl = new StringBuilder(endpoint.getRemainingUrl());
                     metaFileWriter.write("\n  " + path + ": ");
                     for (Variable variable : variables) {
                         if (variable.getForEndpoint().equals(endpointName)) {
-                            String[] remainingUrlParts = endpointRemainingUrl.split(variable.getName());
-                            endpointRemainingUrl = remainingUrlParts[0] + variable.getValue();
+                            String[] remainingUrlParts = endpointRemainingUrl.toString().split(variable.getName());
+                            if (variable.getName().contains("body")) {
+                                if (!remainingUrlParts[0].equals("/")){
+                                    int lastIndexOfForwardSlash = remainingUrlParts[0].lastIndexOf('/');
+                                    if (lastIndexOfForwardSlash == remainingUrlParts[0].length() -1) {
+                                        endpointRemainingUrl = new StringBuilder(remainingUrlParts[0].substring(
+                                                0,
+                                                remainingUrlParts[0].length() - 1
+                                        ));
+                                    } else {
+                                        endpointRemainingUrl = new StringBuilder(remainingUrlParts[0]);
+                                    }
+                                } else {
+                                    endpointRemainingUrl = new StringBuilder();
+                                }
+                            } else {
+                                if (path.contains("_empty_" + variable.getName())) {
+                                    if (variable.getIsInUrl()) {
+                                        endpointRemainingUrl = new StringBuilder(remainingUrlParts[0]);
+                                    } else {
+                                        endpointRemainingUrl = new StringBuilder(remainingUrlParts[0] + variable.getName() + "=");
+                                    }
+                                } else if (path.contains("_invalid_" + variable.getName())) {
+                                    if (variable.getIsInUrl()) {
+                                        endpointRemainingUrl = new StringBuilder(remainingUrlParts[0] + "asdasdasd");
+                                    } else {
+                                        endpointRemainingUrl = new StringBuilder(remainingUrlParts[0] + variable.getName() + "=asdasdasd");
+                                    }
+                                } else if (path.contains("_missing_" + variable.getName())) {
+                                    endpointRemainingUrl = new StringBuilder(remainingUrlParts[0]);
+                                    if (!variable.getIsInUrl()) {
+                                        int lastOccurrenceCommercialAndSymbol = endpointRemainingUrl.lastIndexOf("&");
+                                        if (lastOccurrenceCommercialAndSymbol == endpointRemainingUrl.length() - 1) {
+                                            endpointRemainingUrl = new StringBuilder(endpointRemainingUrl.substring(
+                                                    0,
+                                                    lastOccurrenceCommercialAndSymbol
+                                            ));
+                                        }
+                                    }
+                                } else if (path.contains("_valid_" + variable.getName())) {
+                                    if (variable.getIsInUrl()) {
+                                        endpointRemainingUrl = new StringBuilder(remainingUrlParts[0] + variable.getValue());
+                                    } else {
+                                        endpointRemainingUrl = new StringBuilder(remainingUrlParts[0] + variable.getName() + "=" + variable.getValue());
+                                    }
+                                }
+                            }
                             if (remainingUrlParts.length > 1) {
-                                endpointRemainingUrl += remainingUrlParts[1];
+                                endpointRemainingUrl.append(remainingUrlParts[1]);
                             }
                         }
                     }
-                    metaFileWriter.write(endpointRemainingUrl);
+                    if (endpointRemainingUrl.toString().equals("")) {
+                        endpointRemainingUrl = new StringBuilder("/");
+                    }
+                    int lastOccurrenceQuestionMark = endpointRemainingUrl.lastIndexOf("?");
+                    if (lastOccurrenceQuestionMark == endpointRemainingUrl.length() - 1) {
+                        endpointRemainingUrl = new StringBuilder(endpointRemainingUrl.substring(
+                                0,
+                                lastOccurrenceQuestionMark
+                        ));
+                    }
+                    metaFileWriter.write(endpointRemainingUrl.toString());
 
                 }
             }
