@@ -80,7 +80,11 @@ public final class Form extends ViewElements implements
         setAddFeatureFeatureEndpointVariableOnClickEvent();
         setRemoveFeatureEndpointVariableOnClickEvent();
         setFeatureFileNameChangeEvent();
-        if (runTestCode == 1 || runTestCode == 2) {
+        if (runTestCode != 0) {
+//            if (runTestCode == 3) {
+//                deleteAllFoldersSelfTestByPopulatingFormResponse("");
+//            } else {
+//            }
             runElement.startTest();
         }
     }
@@ -91,13 +95,13 @@ public final class Form extends ViewElements implements
         printMessage("Start processing...", 750);
         printMessage("Checking if base folder exists...", 1000);
         if (runTestCode == 0) {
-            readFormResponse();
+            readForm();
         } else {
-            FormManager fm = new FormManager(this, this);
-            if (runTestCode == 1) {
+            FormManager fm = new FormManager(this, this, runTestCode);
+            if (runTestCode != 3) {
                 fm.startTest();
-            } else if (runTestCode == 2) {
-                fm.startTestByPopulatingForm();
+            } else {
+                deleteAllFoldersSelfTestByPopulatingFormResponse("");
             }
         }
     }
@@ -107,10 +111,11 @@ public final class Form extends ViewElements implements
         printMessage(response, 0);
         printMessage("Creating feature folder...", 0);
         populateForm();
-        readFormResponse();
+        readForm();
     }
 
     private void populateForm() {
+        printMessage("Populating form....", 750);
         baseFolderElement.setBaseFolderPath("D:\\Users\\nb27853\\omni-qa-pluma-test");
         featureElements.forEach(
                 featureElement -> {
@@ -173,14 +178,14 @@ public final class Form extends ViewElements implements
 
     }
 
-    public void readFormResponse() {
+    public void readForm() {
         String baseFolderInput;
         BaseFolder baseFolder;
         List<Feature> features = new ArrayList<>();
         List<Endpoint> endpoints = new ArrayList<>();
         List<Variable> variables = new ArrayList<>();
 
-        printMessage("Reading Input:", 0);
+        printMessage("Reading Input:", 750);
         baseFolderInput = baseFolderElement.getBaseFolderPath();
         printMessage("Project base folder: " + baseFolderInput, 0);
         baseFolder = new BaseFolder(baseFolderInput);
@@ -261,7 +266,8 @@ public final class Form extends ViewElements implements
                 features.get(0),
                 endpoints,
                 variables,
-                this
+                this,
+                runTestCode
         );
         fm.start();
     }
