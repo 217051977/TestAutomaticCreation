@@ -72,7 +72,7 @@ public final class Form extends ViewElements implements
         createBaseFolderElementTab(tabbedPane);
         createFeatureElementTab(tabbedPane);
         createRunElementTab(tabbedPane);
-        tabbedPane.setSelectedIndex(4);
+        tabbedPane.setSelectedIndex(0);
         setAddFeatureOnClickEvent();
         setRemoveFeatureOnClickEvent();
         setAddFeatureFeatureEndpointOnClickEvent();
@@ -81,10 +81,6 @@ public final class Form extends ViewElements implements
         setRemoveFeatureEndpointVariableOnClickEvent();
         setFeatureFileNameChangeEvent();
         if (runTestCode != 0) {
-//            if (runTestCode == 3) {
-//                deleteAllFoldersSelfTestByPopulatingFormResponse("");
-//            } else {
-//            }
             runElement.startTest();
         }
     }
