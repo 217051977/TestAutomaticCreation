@@ -4,6 +4,10 @@ import view.form.Form;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.util.Arrays;
+import java.util.Map;
 
 public class WindowManager {
 
@@ -21,6 +25,22 @@ public class WindowManager {
         window.setSize(WIDTH, HEIGHT);
         window.setContentPane(createWindowContentPane(window.getContentPane()));
         window.setLocationRelativeTo(null);
+        window.addWindowListener(
+                new WindowAdapter() {
+                    @Override
+                    public void windowClosing(WindowEvent e) {
+                        Map<Thread, StackTraceElement[]> threads = Thread.getAllStackTraces();
+                        threads.forEach(
+                                (thread, stackTraceElements) -> {
+                                    System.out.println("\n\n");
+                                    System.out.println(thread);
+                                    System.out.println(Arrays.toString(stackTraceElements));
+                                }
+                        );
+                        super.windowClosing(e);
+                    }
+                }
+        );
     }
 
     private static Container createWindowContentPane(Container windowContentPane) {

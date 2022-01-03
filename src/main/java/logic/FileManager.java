@@ -4,6 +4,7 @@ import formelements.BaseFolder;
 import formelements.Endpoint;
 import formelements.Feature;
 import formelements.Variable;
+import observers.CountTimePassed;
 import observers.PrintMessage;
 import observers.sefltest.DeleteAllFoldersSelfTestByPopulatingFormResponse;
 
@@ -22,10 +23,10 @@ import java.util.stream.Collectors;
 public class FileManager {
 
     private final String baseUrl;
-    private final int variablesSize;
     private final int testRunningCode;
 
     private final PrintMessage printMessage;
+    private CountTimePassed countTimePassed;
     private DeleteAllFoldersSelfTestByPopulatingFormResponse deleteAllFoldersSelfTestByPopulatingFormResponse;
 
     private final String featureFileName;
@@ -42,7 +43,6 @@ public class FileManager {
     ) {
         this.printMessage = printMessage;
         this.featureFileName = this.feature.getFileName();
-        this.variablesSize = this.variables.size();
         this.baseUrl = this.feature.getBaseEndpoint();
         this.testRunningCode = testRunningCode;
         this.projectBaseFolderPath = baseFolder.getBaseFolderPath();
@@ -63,9 +63,14 @@ public class FileManager {
         this.variables = variables;
         this.baseFolder = baseFolder;
         this.projectBaseFolderPath = baseFolder.getBaseFolderPath();
-        this.variablesSize = this.variables.size();
         this.baseUrl = this.feature.getBaseEndpoint();
         this.testRunningCode = testRunningCode;
+    }
+
+    public void setCountTimePassed(
+            CountTimePassed countTimePassed
+    ) {
+        this.countTimePassed = countTimePassed;
     }
 
     public void setDeleteAllFoldersSelfTestByPopulatingFormResponse(
@@ -224,7 +229,6 @@ public class FileManager {
                 getFeatureFolderFinder(featureFolder.getPath(), false);
             } else {
                 failToCreateFolderResponse(
-                        "ERROR FOUND! NOT possible to create feature folder! Process stopped."
                 );
             }
         }
@@ -247,34 +251,158 @@ public class FileManager {
     }
 
     private void setupEndpointFolderCreator(String featureFolderPath) {
+        List<Thread> threads = new ArrayList<>();
+        List<EndpointFolderCreationManager> endpointFolderCreationManagers = new ArrayList<>();
         for (Endpoint endpoint : endpoints) {
             if (endpoint.getForFeature().equals(featureFileName)) {
                 setupVariablesCombination(
                         featureFolderPath,
                         endpoint.getName(),
-                        endpoint.getHasInvalidUserTest()
+                        endpoint.getHasInvalidUserTest(),
+                        endpointFolderCreationManagers
                 );
             }
         }
+
+        countTimePassed.countTimePassed(System.currentTimeMillis());
+
+        int numberOfCores = Runtime.getRuntime().availableProcessors();
+        int reservedThreadsNumber = 3;
+        if (numberOfCores > reservedThreadsNumber) {
+            int endpointFolderCreationManagersSize = endpointFolderCreationManagers.size();
+            int endpointFolderCreationManagersPerCore = endpointFolderCreationManagersSize / (numberOfCores - reservedThreadsNumber);
+
+            for (int i = 0; i < numberOfCores - reservedThreadsNumber; i++) {
+                if (i != numberOfCores - 1 - reservedThreadsNumber) {
+                    List<EndpointFolderCreationManager> endpointFolderCreationManagersToLaunch = new ArrayList<>();
+                    for (int j = 0; j < endpointFolderCreationManagersPerCore; j++) {
+                        if (j == endpointFolderCreationManagersPerCore - 1) {
+                            endpointFolderCreationManagers.get(j).setLastOne();
+                        }
+                        endpointFolderCreationManagersToLaunch.add(endpointFolderCreationManagers.get(j));
+                    }
+                    launchThread(
+                            endpointFolderCreationManagersToLaunch,
+                            threads,
+                            i
+                    );
+                    endpointFolderCreationManagers.removeAll(endpointFolderCreationManagersToLaunch);
+                } else {
+                    endpointFolderCreationManagers.get(endpointFolderCreationManagers.size() - 1).setLastOne();
+                    launchThread(
+                            endpointFolderCreationManagers,
+                            threads,
+                            i
+                    );
+                }
+            }
+        } else {
+            launchThread(
+                    endpointFolderCreationManagers,
+                    threads,
+                    0
+            );
+        }
+//        startThreads(threads);
+//        endpointFolderCreator(
+//                featureFolderPath,
+//                newFolderName + "_but_with_expired_token"
+//        );
+        Thread thread = new Thread(
+                () -> {
+                    if (checkIfEveryThreadIsDone(threads, 1)) {
+                        getMetaCreator(featureFolderPath);
+                    }
+                }
+        );
+        thread.setName("Thread_Check_If_Every_Thread_Is_Done");
+        thread.start();
     }
 
-    private void setupVariablesCombination(String featureFolderPath, String folderName, boolean hasInvalidUserTest) {
+    private void launchThread(
+            List<EndpointFolderCreationManager> endpointFolderCreationManagers,
+            List<Thread> threads,
+            int i
+    ) {
+        Thread thread = new Thread(
+                () -> endpointFolderCreationManagers.forEach(
+                        EndpointFolderCreationManager::endpointFolderCreator
+                )
+        );
+        thread.setName("Thread_Number" + i);
+        startThread(thread, 1);
+        threads.add(thread);
+        System.out.println(threads.size());
+        System.out.println(thread.getName());
+    }
+
+    private boolean checkIfEveryThreadIsDone(List<Thread> threads, int multiplier) {
+        List<Thread> runningThreads = new ArrayList<>();
+        try {
+            Thread.sleep(500L * multiplier);
+            for (Thread thread : threads) {
+                if (thread.isAlive()) {
+                    runningThreads.add(thread);
+                }
+            }
+            if (runningThreads.size() == 0) {
+                return true;
+            } else if (runningThreads.size() < threads.size()) {
+                if (multiplier > 1) {
+                    multiplier--;
+                }
+                return checkIfEveryThreadIsDone(runningThreads, multiplier);
+            } else {
+                multiplier++;
+                return checkIfEveryThreadIsDone(runningThreads, multiplier);
+            }
+
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    private void startThread(Thread thread, int multiplier) {
+        try {
+            thread.start();
+        } catch (OutOfMemoryError oof) {
+            try {
+                Thread.sleep(500L * multiplier);
+                multiplier++;
+                startThread(thread, multiplier);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            oof.printStackTrace();
+        }
+    }
+
+    private void setupVariablesCombination(String featureFolderPath, String endpointName, boolean hasInvalidUserTest, List<EndpointFolderCreationManager> endpointFolderCreationManagers) {
         StringBuilder newFolderName = new StringBuilder();
 
         List<List<String>> combinations = new ArrayList<>();
-        if (variablesSize > 0) {
+        int nVarForEndpoint = 0;
+        List<Variable> variablesForEndpoint = new ArrayList<>();
+        for (Variable variable : variables) {
+            if (variable.getForEndpoint().equals(endpointName)) {
+                variablesForEndpoint.add(variable);
+                nVarForEndpoint++;
+            }
+        }
+        if (nVarForEndpoint > 0) {
             for (int k = 0; k < 4; k++) {
-                Variable variable1 = variables.get(0);
-                String combinationPrefix = getCombinationPrefix(variable1, k);
+                Variable variable = variablesForEndpoint.get(0);
+                String combinationPrefix = getCombinationPrefix(variable, k);
                 String toAdd = "";
                 if (combinationPrefix == null) {
                     continue;
                 } else {
                     toAdd += combinationPrefix;
                 }
-                List<String> combination = new ArrayList<>(List.of(toAdd + variable1.getName()));
-                if (variablesSize > 1) {
-                    getCombinations(combinations, combination, variablesSize, 1);
+                List<String> combination = new ArrayList<>(List.of(toAdd + variable.getName()));
+                if (nVarForEndpoint > 1) {
+                    getCombinations(combinations, combination, nVarForEndpoint, 1, variablesForEndpoint);
                 } else {
                     combinations.add(combination);
                 }
@@ -283,54 +411,119 @@ public class FileManager {
             System.out.println(combinations);
             for (List<String> combinationList: combinations) {
                 if (combinationList.size() > 0) {
-                    newFolderName = new StringBuilder(folderName + "_with");
+                    newFolderName = new StringBuilder(endpointName + "_with");
                     for (String comb : combinationList) {
                         newFolderName.append(comb);
                     }
-                    endpointFolderCreator(featureFolderPath, newFolderName.toString());
+                    String finalNewFolderName = newFolderName.toString();
+                    printMessage("Preparing to create endpoint folder " + finalNewFolderName.toUpperCase() + "...");
+                    endpointFolderCreationManagers.add(
+                            new EndpointFolderCreationManager(
+                                    printMessage,
+                                    endpoints,
+                                    featureFolderPath,
+                                    finalNewFolderName
+                            )
+                    );
+//                    Thread thread = new Thread(
+//                            () -> new EndpointFolderCreationManager(
+//                                    printMessage,
+//                                    endpoints
+//                            ).endpointFolderCreator(
+//                                    featureFolderPath,
+//                                    finalNewFolderName
+//                            )
+//                    );
+//                    thread.setName("Thread_" + finalNewFolderName);
+//                    startThread(thread, 1);
+//                    threads.add(thread);
+//                    System.out.println(threads.size());
+//                    System.out.println(thread.getName());
                 }
             }
         } else {
-            newFolderName = new StringBuilder(folderName);
-            endpointFolderCreator(featureFolderPath, newFolderName.toString());
+            newFolderName = new StringBuilder(endpointName);
+            String finalNewFolderName = newFolderName.toString();
+            printMessage("Creating endpoint folder " + finalNewFolderName.toUpperCase() + "...");
+            endpointFolderCreationManagers.add(
+                    new EndpointFolderCreationManager(
+                            printMessage,
+                            endpoints,
+                            featureFolderPath,
+                            finalNewFolderName
+                    )
+            );
+//            new Thread(
+//                    () -> new EndpointFolderCreationManager(
+//                            printMessage,
+//                            endpoints
+//                    ).endpointFolderCreator(
+//                            featureFolderPath,
+//                            finalNewFolderName
+//                    )
+//            );
         }
 
 
         if (hasInvalidUserTest) {
-            endpointFolderCreator(
-                    featureFolderPath,
-                    newFolderName + "_but_with_invalid_user"
+            String finalNewFolderName = newFolderName + "_but_with_invalid_user";
+            printMessage("Creating endpoint folder " + finalNewFolderName.toUpperCase() + "...");
+            endpointFolderCreationManagers.add(
+                    new EndpointFolderCreationManager(
+                            printMessage,
+                            endpoints,
+                            featureFolderPath,
+                            finalNewFolderName
+                    )
             );
+//            new Thread(
+//                    () -> new EndpointFolderCreationManager(
+//                            printMessage,
+//                            endpoints
+//                    ).endpointFolderCreator(
+//                            featureFolderPath,
+//                            finalNewFolderName
+//                    )
+//            );
         }
-        endpointFolderCreator(
-                featureFolderPath,
-                newFolderName + "_but_with_expired_token"
+        String finalNewFolderName = newFolderName + "_but_with_expired_token";
+        printMessage("Creating endpoint folder " + finalNewFolderName.toUpperCase() + "...");
+        endpointFolderCreationManagers.add(
+                new EndpointFolderCreationManager(
+                        printMessage,
+                        endpoints,
+                        featureFolderPath,
+                        finalNewFolderName
+                )
         );
-        getMetaCreator(featureFolderPath);
+//        new Thread(
+//                () -> new EndpointFolderCreationManager(
+//                        printMessage,
+//                        endpoints
+//                ).endpointFolderCreator(
+//                        featureFolderPath,
+//                        finalNewFolderName
+//                )
+//        );
+
+//        for (int i = 0; i < endpointFolderCreationManagersSize; i++) {
+//
+//        }
+
     }
 
-    private void endpointFolderCreator(String featureFolderPath, String folderName) {
-        //    private final int pauseTimeResponse = 750;
-        int pauseTimeCommand = 0;
-        printMessage.printMessage("Creating endpoint folder " + folderName.toUpperCase() + "...", pauseTimeCommand);
-        getEndpointFolderCreator(
-                featureFolderPath,
-                folderName
-        );
-    }
-
-    private void getCombinations(List<List<String>> combinations, List<String> toAdd, int variableSize, int i) {
+    private void getCombinations(List<List<String>> combinations, List<String> toAdd, int variableSize, int i, List<Variable> variablesForEndpoint) {
         if (i + 1 < variableSize) {
             for (int j = 0; j < 4; j++) {
-                List<String> combination = addCombination(toAdd, i, j);
+                List<String> combination = addCombination(toAdd, i, j, variablesForEndpoint);
                 if (combination == null) {
                     continue;
                 }
-                getCombinations(combinations, combination, variableSize, i + 1);
+                getCombinations(combinations, combination, variableSize, i + 1, variablesForEndpoint);
             }
         } else {
             for (int j = 0; j < 4; j++) {
-                List<String> combination = addCombination(toAdd, i, j);
+                List<String> combination = addCombination(toAdd, i, j, variablesForEndpoint);
                 if (combination == null) {
                     continue;
                 }
@@ -341,17 +534,17 @@ public class FileManager {
         }
     }
 
-    private List<String> addCombination(List<String> toAdd, int i, int j) {
+    private List<String> addCombination(List<String> toAdd, int i, int j, List<Variable> variablesForEndpoint) {
         List<String> combination = new ArrayList<>(toAdd);
-        Variable variable2 = variables.get(i);
-        String combinationPrefix2 = getCombinationPrefix(variable2, j);
+        Variable variable = variablesForEndpoint.get(i);
+        String combinationPrefix2 = getCombinationPrefix(variable, j);
         String toAdd2 = "";
         if (combinationPrefix2 == null) {
             return null;
         } else {
             toAdd2 += combinationPrefix2;
         }
-        combination.add(toAdd2 + variable2.getName());
+        combination.add(toAdd2 + variable.getName());
         return combination;
     }
 
@@ -374,40 +567,6 @@ public class FileManager {
         return "_valid_";
     }
 
-    private void createEndpointFolder(File endpointFolder, String featureFolderPath, String folderName) {
-        if (endpointFolder.mkdir()) {
-            printMessage(
-                    "Feature folder " + endpointFolder.getName().toUpperCase() + " was created with success at: " + featureFolderPath
-            );
-            getEndpointFolderFinder(featureFolderPath, endpointFolder.getPath(), folderName);
-        } else {
-            failToCreateFolderResponse(
-                    "ERROR FOUND! NOT possible to create feature folder! Process stopped."
-            );
-        }
-    }
-
-    private void getEndpointFolderCreator(String featureFolderPath, String folderName) {
-        File endpointFolder = new File(featureFolderPath + "\\" + folderName);
-        if (endpointFolder.isDirectory()) {
-            if (clearFolder(endpointFolder)) {
-                if (endpointFolder.delete()) {
-                    createEndpointFolder(endpointFolder, featureFolderPath, folderName);
-                } else {
-                    failToCreateFolderResponse(
-                            "ERROR FOUND! NOT possible to delete folder " + endpointFolder.getName().toUpperCase() + "! Process stopped."
-                    );
-                }
-            } else {
-                failToCreateFolderResponse(
-                        "ERROR FOUND! NOT possible to clear folder " + endpointFolder.getName().toUpperCase() + "! Process stopped."
-                );
-            }
-        } else {
-            createEndpointFolder(endpointFolder, featureFolderPath, folderName);
-        }
-    }
-
     private boolean clearFolder(File file) {
         try {
             List<File> files = Files.list(file.toPath()).map(Path::toFile).collect(Collectors.toList());
@@ -427,151 +586,6 @@ public class FileManager {
             return filesInitNumber == filesClearedNumber;
         } catch (IOException e) {
             return false;
-        }
-    }
-
-    private void getEndpointFolderFinder(String featureFolderPath, String endpointFolderPath, String folderName) {
-        File featureFolder = new File(featureFolderPath);
-        if (featureFolder.exists()) {
-            for (Endpoint endpoint : endpoints) {
-                if (folderName.contains(endpoint.getName())) {
-                    //-2 ERROR, -1 - not have body, 0 - missing, 1 - empty, 2 - invalid, 3 - valid
-                    int bodyCombination = getBodyCombination(folderName);
-                    if (bodyCombination != -1 && bodyCombination != 0) {
-                        printMessage("Creating body file to endpoint " + folderName.toUpperCase() + " at: " + endpointFolderPath);
-                        if (bodyCombination == 1) {
-                            getEndpointBodyCreator(
-                                    endpointFolderPath,
-                                    folderName,
-                                    "{}",
-                                    endpoint.getValidHeaders()
-                            );
-                        } else if (bodyCombination == 2) {
-                            getEndpointBodyCreator(
-                                    endpointFolderPath,
-                                    folderName,
-                                    "{\n    \"asdasdasd\": \"asdasdasd\"\n}",
-                                    endpoint.getValidHeaders()
-                            );
-                        } else if (bodyCombination == 3) {
-                            getEndpointBodyCreator(
-                                    endpointFolderPath,
-                                    folderName,
-                                    endpoint.getValidBody(),
-                                    endpoint.getValidHeaders()
-                            );
-                        }
-                    } else {
-                        printMessage("Creating headers file to endpoint " + folderName.toUpperCase() + " at: " + endpointFolderPath);
-                        getEndpointHeadersCreator(
-                                endpointFolderPath,
-                                folderName,
-                                endpoint.getValidHeaders()
-                        );
-                    }
-                    break;
-                }
-            }
-        } else {
-            failToFindFolderResponse(
-                    "Feature folder " + featureFolder.getName().toUpperCase() + " NOT found at: " + endpointFolderPath
-            );
-        }
-    }
-
-    private int getBodyCombination(String name) {
-        String[] namePartsSplitByBody = name.split("_body");
-        if (namePartsSplitByBody.length > 0) {
-            String namePart0SplitByBody = namePartsSplitByBody[0];
-            String[] namePart0SplitByBodyAndUnderscore = namePart0SplitByBody.split("_");
-
-            for (int i = namePart0SplitByBodyAndUnderscore.length - 1; i >= 0; i--) {
-                switch (namePart0SplitByBodyAndUnderscore[i]) {
-                    case "empty":
-                        return 1;
-                    case "invalid":
-                        return 2;
-                    case "missing":
-                        return 0;
-                    case "valid":
-                        return 3;
-                }
-            }
-            return -2;
-        } else {
-            return -1;
-        }
-
-    }
-
-    private void getEndpointBodyCreator(String endpointFolderPath, String folderName, String body, String headers) {
-        try {
-            File bodyFile = new File(endpointFolderPath + "\\body.json");
-            FileWriter bodyFileWriter = new FileWriter(bodyFile);
-            bodyFileWriter.write(body);
-            bodyFileWriter.close();
-            getEndpointBodyFinder(
-                    endpointFolderPath,
-                    bodyFile.getPath(),
-                    folderName,
-                    headers
-            );
-        } catch (IOException e) {
-            e.printStackTrace();
-            failToCreateFileResponse(
-                    "ERROR FOUND! NOT possible to create body file! Process stopped."
-            );
-        }
-    }
-
-    private void getEndpointBodyFinder(String endpointFolderPath, String bodyFilePath, String folderName, String headers) {
-        File bodyFile = new File(bodyFilePath);
-        if (bodyFile.exists()) {
-            getEndpointHeadersCreator(
-                    endpointFolderPath,
-                    folderName,
-                    headers
-            );
-        } else {
-            failToFindFileResponse(
-                    "Body file NOT found at: " + endpointFolderPath
-            );
-        }
-    }
-
-    private void getEndpointHeadersCreator(String endpointFolderPath, String folderName, String headers) {
-        headers = setupHeaders(folderName, headers);
-        try {
-            File headersFile = new File(endpointFolderPath + "\\headers.yaml");
-            FileWriter headersFileWriter = new FileWriter(headersFile);
-            headersFileWriter.write(headers);
-            headersFileWriter.close();
-            getEndpointHeadersFinder(
-                    endpointFolderPath,
-                    headersFile.getPath()
-            );
-        } catch (IOException e) {
-            e.printStackTrace();
-            failToCreateFileResponse(
-                    "ERROR FOUND! NOT possible to create headers file! Process stopped."
-            );
-        }
-    }
-
-    private String setupHeaders(String folderName, String headers) {
-        if (folderName.contains("_but_with_invalid_user")) {
-            String[] headersParts = headers.split("\\$var_bearer_token");
-            headers = headersParts[0] + "_invalid" + "_user";
-        }
-        return headers;
-    }
-
-    private void getEndpointHeadersFinder(String endpointFolderPath, String filePath) {
-        File headersFile = new File(filePath);
-        if (!headersFile.exists()) {
-            failToFindFileResponse(
-                    "Headers file NOT found at: " + endpointFolderPath
-            );
         }
     }
 
@@ -795,11 +809,13 @@ public class FileManager {
         File metaFile = new File(filePath);
         if (metaFile.exists()) {
             printMessage("Sit.data file found at: " + featureFolderPath);
+            countTimePassed.countTimePassed(System.currentTimeMillis());
             if (testRunningCode == 0) {
                 printMessage("\n\nCreation completed with success!");
             } else {
                 printMessage("\n\nTest concluded with success!");
             }
+            Thread.currentThread().interrupt();
         } else {
             failToFindFileResponse(
                     "Sit.data file NOT found at: " + featureFolderPath
@@ -811,8 +827,8 @@ public class FileManager {
         printMessage.printMessage(response, 0);
     }
 
-    private void failToCreateFolderResponse(String response) {
-        printMessage.printMessage(response, 0);
+    private void failToCreateFolderResponse() {
+        printMessage.printMessage("ERROR FOUND! NOT possible to create feature folder! Process stopped.", 0);
     }
 
     private void failToFindFolderResponse(String response) {

@@ -3,9 +3,11 @@ package view.form.elements;
 import view.elements.ViewElements;
 
 import javax.swing.*;
+import java.awt.*;
+import java.io.File;
 
-import static javax.swing.GroupLayout.Alignment.LEADING;
 import static javax.swing.GroupLayout.Alignment.BASELINE;
+import static javax.swing.GroupLayout.Alignment.LEADING;
 
 public class BaseFolderElement extends ViewElements {
 
@@ -45,6 +47,33 @@ public class BaseFolderElement extends ViewElements {
 
     public void setBaseFolderPath(String text) {
         baseFolderPath.setText(text);
+    }
+
+    public void openFolderChooser(Container windowContentPane) {
+        baseFolderPathSelector.addActionListener(
+                e -> {
+                    JFileChooser fileChooser = new JFileChooser();
+                    fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+                    fileChooser.setPreferredSize(
+                            new Dimension(
+                                    windowContentPane.getWidth() - 75,
+                                    windowContentPane.getHeight() - 100
+                            )
+                    );
+                    int lastOccurrenceBackSlash = baseFolderPath.getText().lastIndexOf("\\");
+                    String currentPath = baseFolderPath.getText().substring(0, lastOccurrenceBackSlash);
+                    fileChooser.setCurrentDirectory(
+                            new File(currentPath)
+                    );
+                    int option = fileChooser.showOpenDialog(windowContentPane);
+                    if (option == JFileChooser.APPROVE_OPTION) {
+                        File dir = fileChooser.getSelectedFile();
+                        baseFolderPath.setText(dir.getAbsolutePath());
+                        windowContentPane.revalidate();
+                        windowContentPane.repaint();
+                    }
+                }
+        );
     }
 
 }

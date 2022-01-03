@@ -47,6 +47,11 @@ public class FeatureEndpointElement extends ViewElements {
         endpointValidBody = getViewTextArea();
         endpointValidHeadersLabel = getViewLabel("Set the valid header you wish to use:");
         endpointValidHeaders = getViewTextArea();
+        ((JTextArea) endpointValidHeaders.getViewport().getView()).setText(
+                "accept: application/json\n" +
+                        "authorization: Bearer $var_bearer_token_user\n" +
+                        "Content-Type: application/json"
+        );
         createFeatureEndpointElementTab();
     }
 

@@ -5,6 +5,7 @@ import formelements.Endpoint;
 import formelements.Feature;
 import formelements.Variable;
 import logic.FormManager;
+import observers.CountTimePassed;
 import observers.PrintMessage;
 import observers.RunButtonPressedResponse;
 import observers.sefltest.DeleteAllFoldersSelfTestByPopulatingFormResponse;
@@ -14,6 +15,7 @@ import view.form.elements.*;
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import static javax.swing.GroupLayout.Alignment.BASELINE;
@@ -21,11 +23,16 @@ import static javax.swing.GroupLayout.Alignment.BASELINE;
 public final class Form extends ViewElements implements
         RunButtonPressedResponse,
         PrintMessage,
-        DeleteAllFoldersSelfTestByPopulatingFormResponse
+        DeleteAllFoldersSelfTestByPopulatingFormResponse,
+        CountTimePassed
 {
 
-    private int runTestCode = 0;
+    private int runTestCode = 2;
+    private int nPrints = 0;
+    private final int maxPrints = 20000;
+    private final int printTimeOut = 5000;
     private Container windowContentPane;
+    private long startTimeInMillis;
 
     private final BaseFolderElement baseFolderElement = new BaseFolderElement();
     private final RunElement runElement;
@@ -73,6 +80,7 @@ public final class Form extends ViewElements implements
         createFeatureElementTab(tabbedPane);
         createRunElementTab(tabbedPane);
         tabbedPane.setSelectedIndex(0);
+        setOpenFolderChooserOnClickEvent();
         setAddFeatureOnClickEvent();
         setRemoveFeatureOnClickEvent();
         setAddFeatureFeatureEndpointOnClickEvent();
@@ -86,14 +94,51 @@ public final class Form extends ViewElements implements
     }
 
     @Override
+    public void countTimePassed(long currentTime) {
+        long dif = currentTime - startTimeInMillis;
+        long secInMilli = 1000;
+        long minInMilli = secInMilli * 60;
+        long hoursInMilli = minInMilli * 60;
+        long daysInMilli = hoursInMilli * 24;
+        long days = dif / daysInMilli;
+        dif = dif % daysInMilli;
+        long hours = dif / hoursInMilli;
+        dif = dif % hoursInMilli;
+        long min = dif / minInMilli;
+        dif = dif % minInMilli;
+        long sec = dif / secInMilli;
+        printMessage(
+                "Started at: " + new Date(startTimeInMillis),
+                0
+        );
+        printMessage(
+                "Current time: " + new Date(currentTime),
+                0
+        );
+        printMessage(
+                "Time passed: " + days + " days, " + hours + " hours, " + min +" minutes, " + sec + " seconds",
+                1000
+        );
+        System.out.printf(
+                "Time passed: %d days, %d hours, %d minutes, %d seconds%n",
+                days,
+                hours,
+                min,
+                sec
+        );
+    }
+
+    @Override
     public void runButtonPressedResponse() {
+        startTimeInMillis = System.currentTimeMillis();
+
         runElement.clearOutputArea();
         printMessage("Start processing...", 750);
         printMessage("Checking if base folder exists...", 1000);
         if (runTestCode == 0) {
             readForm();
         } else {
-            FormManager fm = new FormManager(this, this, runTestCode);
+            FormManager fm = new FormManager(this, this, this, runTestCode);
             if (runTestCode != 3) {
                 fm.startTest();
             } else {
@@ -121,25 +166,43 @@ public final class Form extends ViewElements implements
                     featureElement.setFeatureTags("@cms @opc @permissions");
                 }
         );
-        featureEndpointElements.forEach(
-                featureEndpointElement -> {
-                    featureEndpointElement.setEndpointForFeature("cms_opc_permissions");
-                    featureEndpointElement.setEndpointName("get_search_for_permissions_given_a_query");
-                    featureEndpointElement.setEndpointRemainUrl("/query?expression&limit&sort");
-                    featureEndpointElement.setEndpointRequestType("GET");
-                    featureEndpointElement.setEndpointValidBody(
+        int nEndpoints = 2;
+        if (featureEndpointElements.size() < nEndpoints) {
+            for (int i = 1; i < nEndpoints; i++) {
+                addFeatureEndpoint.doClick();
+            }
+        } else if (featureEndpointElements.size() > nEndpoints) {
+            int size = featureEndpointElements.size();
+            for (int i = 0; i < size - nEndpoints; i++){
+                removeFeatureEndpoint.doClick();
+            }
+        }
+        for (int i = 0; i < nEndpoints; i++) {
+            featureEndpointElements.get(i).setEndpointForFeature("cms_opc_permissions");
+            switch (i) {
+                case 0: {
+                    featureEndpointElements.get(i).setEndpointName("get_search_for_permissions_given_a_query");
+                    featureEndpointElements.get(i).setEndpointRemainUrl("/query?expression&sort/body");
+                    featureEndpointElements.get(i).setEndpointRequestType("GET");
+                    featureEndpointElements.get(i).setEndpointValidBody(
                             "{\n" +
                                     "    \"name\": \"permission_temp\"\n" +
                                     "}"
                     );
-                    featureEndpointElement.setEndpointValidHeaders(
-                            "accept: application/json\n" +
-                                    "authorization: Bearer $var_bearer_token_user\n" +
-                                    "Content-Type: application/json"
-                    );
+                }break;
+                default: {
+                    featureEndpointElements.get(i).setEndpointName("post_search_for_permissions");
+                    featureEndpointElements.get(i).setEndpointRemainUrl("/expression");
+                    featureEndpointElements.get(i).setEndpointRequestType("POST");
                 }
-        );
-        int nVar = 3;
+                featureEndpointElements.get(i).setEndpointValidHeaders(
+                        "accept: application/json\n" +
+                                "authorization: Bearer $var_bearer_token_user\n" +
+                                "Content-Type: application/json"
+                );
+            }
+        }
+        int nVar = 9;
         if (featureEndpointVariableElements.size() < nVar) {
             for (int i = 0; i < nVar; i++) {
                 addFeatureEndpointVariable.doClick();
@@ -151,23 +214,37 @@ public final class Form extends ViewElements implements
             }
         }
         for (int i = 0; i < nVar; i++) {
-            featureEndpointVariableElements.get(i).setVariableForEndpoint("get_search_for_permissions_given_a_query");
             switch (i) {
                 case 0: {
+                    featureEndpointVariableElements.get(i).setVariableForEndpoint("post_search_for_permissions");
                     featureEndpointVariableElements.get(i).setVariableName("expression");
                     featureEndpointVariableElements.get(i).setVariableValue("name==$cms_opc_permission_name");
+                    featureEndpointVariableElements.get(i).setVariableIsInUrl(true);
+                    featureEndpointVariableElements.get(i).setVariableCombinationsEmpty(false);
                 }break;
                 case 1: {
-                    featureEndpointVariableElements.get(i).setVariableName("limit");
-                    featureEndpointVariableElements.get(i).setVariableValue("1");
+                    featureEndpointVariableElements.get(i).setVariableForEndpoint("get_search_for_permissions_given_a_query");
+                    featureEndpointVariableElements.get(i).setVariableName("expression");
+                    featureEndpointVariableElements.get(i).setVariableValue("name==$cms_opc_permission_name");
+                    featureEndpointVariableElements.get(i).setVariableIsInUrl(false);
+                    featureEndpointVariableElements.get(i).setVariableCombinationsEmpty(true);
                 }break;
-                default: {
+                case 2: {
+                    featureEndpointVariableElements.get(i).setVariableForEndpoint("get_search_for_permissions_given_a_query");
                     featureEndpointVariableElements.get(i).setVariableName("sort");
                     featureEndpointVariableElements.get(i).setVariableValue("asc");
+                    featureEndpointVariableElements.get(i).setVariableIsInUrl(false);
+                    featureEndpointVariableElements.get(i).setVariableCombinationsEmpty(true);
+                }break;
+                default: {
+                    featureEndpointVariableElements.get(i).setVariableForEndpoint("get_search_for_permissions_given_a_query");
+//                    featureEndpointVariableElements.get(i).setVariableName("body");
+                    featureEndpointVariableElements.get(i).setVariableName("var" + i);
+                    featureEndpointVariableElements.get(i).setVariableValue("");
+                    featureEndpointVariableElements.get(i).setVariableIsInUrl(false);
+                    featureEndpointVariableElements.get(i).setVariableCombinationsEmpty(true);
                 }
             }
-            featureEndpointVariableElements.get(i).setVariableIsInUrl(false);
-            featureEndpointVariableElements.get(i).setVariableCombinationsEmpty(true);
             featureEndpointVariableElements.get(i).setVariableCombinationsInvalid(true);
             featureEndpointVariableElements.get(i).setVariableCombinationsMissing(true);
         }
@@ -256,22 +333,36 @@ public final class Form extends ViewElements implements
             );
             variables.add(variable);
         }
-        FormManager fm = new FormManager(
-                this,
-                baseFolder,
-                features.get(0),
-                endpoints,
-                variables,
-                this,
-                runTestCode
-        );
-        fm.start();
+        try {
+            Thread.sleep(1000);
+            FormManager fm = new FormManager(
+                    this,
+                    this,
+                    baseFolder,
+                    features.get(0),
+                    endpoints,
+                    variables,
+                    this,
+                    runTestCode
+            );
+            new Thread(
+                    fm::start
+            ).start();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
-    public void printMessage(String message, int timeInMillis) {
+    public synchronized void printMessage(String message, int timeInMillis) {
         runElement.setOutputArea(message);
         try {
+            if (nPrints < maxPrints) {
+                nPrints ++;
+            } else {
+                nPrints = 0;
+                Thread.sleep(printTimeOut - timeInMillis);
+            }
             Thread.sleep(timeInMillis);
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -285,6 +376,15 @@ public final class Form extends ViewElements implements
                     featureElements.get(i)
             );
         }
+    }
+
+    private void setOpenFolderChooserOnClickEvent() {
+//        addFeature.addActionListener(
+//                actionEvent -> {
+                    baseFolderElement.openFolderChooser(windowContentPane);
+                    resetWindow(windowContentPane);
+//                }
+//        );
     }
 
     private void setAddFeatureOnClickEvent() {
@@ -397,6 +497,8 @@ public final class Form extends ViewElements implements
 
     private void addFeatureEndpointElementToFeatureEndpointElements() {
         FeatureEndpointElement featureEndpointElement = new FeatureEndpointElement();
+        String lastFeatureFileName = featureElements.get(featureElements.size() - 1).getFeatureFileName();
+        featureEndpointElement.setEndpointForFeature(lastFeatureFileName);
         featureEndpointElements.add(featureEndpointElement);
         featureEndpointElements.forEach(
                 fe -> featureEndpointElementsPanel.add(fe.getFeatureEndpointElementPanel())
