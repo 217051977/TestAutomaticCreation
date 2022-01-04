@@ -27,7 +27,7 @@ public final class Form extends ViewElements implements
         CountTimePassed
 {
 
-    private int runTestCode = 2;
+    private int runTestCode = 0;
     private int nPrints = 0;
     private final int maxPrints = 20000;
     private final int printTimeOut = 5000;
@@ -160,13 +160,13 @@ public final class Form extends ViewElements implements
         baseFolderElement.setBaseFolderPath("D:\\Users\\nb27853\\omni-qa-pluma-test");
         featureElements.forEach(
                 featureElement -> {
-                    featureElement.setFeatureFileName("cms_opc_permissions");
-                    featureElement.setFeatureName("cms ocp permissions");
-                    featureElement.setFeatureBaseEndpoint("https://delivery-digitaljourney.westeurope.cloudapp.azure.com/bin/mvc.do/operationconsole/v3/permissions");
-                    featureElement.setFeatureTags("@cms @opc @permissions");
+                    featureElement.setFeatureFileName("cms_opc_sessions");
+                    featureElement.setFeatureName("Operation Console API - Sessions");
+                    featureElement.setFeatureBaseEndpoint("https://delivery-digitaljourney.westeurope.cloudapp.azure.com/bin/mvc.do/operationconsole/v3/sessions");
+                    featureElement.setFeatureTags("@cms @opc @session");
                 }
         );
-        int nEndpoints = 2;
+        int nEndpoints = 3;
         if (featureEndpointElements.size() < nEndpoints) {
             for (int i = 1; i < nEndpoints; i++) {
                 addFeatureEndpoint.doClick();
@@ -178,31 +178,26 @@ public final class Form extends ViewElements implements
             }
         }
         for (int i = 0; i < nEndpoints; i++) {
-            featureEndpointElements.get(i).setEndpointForFeature("cms_opc_permissions");
+            featureEndpointElements.get(i).setEndpointForFeature("cms_opc_sessions");
             switch (i) {
                 case 0: {
-                    featureEndpointElements.get(i).setEndpointName("get_search_for_permissions_given_a_query");
-                    featureEndpointElements.get(i).setEndpointRemainUrl("/query?expression&sort/body");
+                    featureEndpointElements.get(i).setEndpointName("get_search_login_records_complex");
+                    featureEndpointElements.get(i).setEndpointRemainUrl("?userName&ipAddress&agent&channel&action&actionStatus&limit&sort");
                     featureEndpointElements.get(i).setEndpointRequestType("GET");
-                    featureEndpointElements.get(i).setEndpointValidBody(
-                            "{\n" +
-                                    "    \"name\": \"permission_temp\"\n" +
-                                    "}"
-                    );
+                }break;
+                case 1: {
+                    featureEndpointElements.get(i).setEndpointName("get_search_login_records_simple");
+                    featureEndpointElements.get(i).setEndpointRemainUrl("/search?expression&limit&sort");
+                    featureEndpointElements.get(i).setEndpointRequestType("GET");
                 }break;
                 default: {
-                    featureEndpointElements.get(i).setEndpointName("post_search_for_permissions");
-                    featureEndpointElements.get(i).setEndpointRemainUrl("/expression");
-                    featureEndpointElements.get(i).setEndpointRequestType("POST");
+                    featureEndpointElements.get(i).setEndpointName("post_sessions_for_logged_user");
+                    featureEndpointElements.get(i).setEndpointRemainUrl("/mysessions?ipAddress&agent&action&actionStatus&limit&sort");
+                    featureEndpointElements.get(i).setEndpointRequestType("GET");
                 }
-                featureEndpointElements.get(i).setEndpointValidHeaders(
-                        "accept: application/json\n" +
-                                "authorization: Bearer $var_bearer_token_user\n" +
-                                "Content-Type: application/json"
-                );
             }
         }
-        int nVar = 9;
+        int nVar = 17;
         if (featureEndpointVariableElements.size() < nVar) {
             for (int i = 0; i < nVar; i++) {
                 addFeatureEndpointVariable.doClick();
@@ -216,37 +211,143 @@ public final class Form extends ViewElements implements
         for (int i = 0; i < nVar; i++) {
             switch (i) {
                 case 0: {
-                    featureEndpointVariableElements.get(i).setVariableForEndpoint("post_search_for_permissions");
-                    featureEndpointVariableElements.get(i).setVariableName("expression");
-                    featureEndpointVariableElements.get(i).setVariableValue("name==$cms_opc_permission_name");
-                    featureEndpointVariableElements.get(i).setVariableIsInUrl(true);
+                    featureEndpointVariableElements.get(i).setVariableForEndpoint("get_search_login_records_complex");
+                    featureEndpointVariableElements.get(i).setVariableName("userName");
+                    featureEndpointVariableElements.get(i).setVariableValue("admin");
+                    featureEndpointVariableElements.get(i).setVariableIsInUrl(false);
                     featureEndpointVariableElements.get(i).setVariableCombinationsEmpty(false);
+                    featureEndpointVariableElements.get(i).setVariableCombinationsMissing(false);
                 }break;
                 case 1: {
-                    featureEndpointVariableElements.get(i).setVariableForEndpoint("get_search_for_permissions_given_a_query");
-                    featureEndpointVariableElements.get(i).setVariableName("expression");
-                    featureEndpointVariableElements.get(i).setVariableValue("name==$cms_opc_permission_name");
+                    featureEndpointVariableElements.get(i).setVariableForEndpoint("get_search_login_records_complex");
+                    featureEndpointVariableElements.get(i).setVariableName("ipAddress");
+                    featureEndpointVariableElements.get(i).setVariableValue("10%2E244%2E2%2E43");
                     featureEndpointVariableElements.get(i).setVariableIsInUrl(false);
-                    featureEndpointVariableElements.get(i).setVariableCombinationsEmpty(true);
+                    featureEndpointVariableElements.get(i).setVariableCombinationsEmpty(false);
+                    featureEndpointVariableElements.get(i).setVariableCombinationsMissing(false);
                 }break;
                 case 2: {
-                    featureEndpointVariableElements.get(i).setVariableForEndpoint("get_search_for_permissions_given_a_query");
+                    featureEndpointVariableElements.get(i).setVariableForEndpoint("get_search_login_records_complex");
+                    featureEndpointVariableElements.get(i).setVariableName("agent");
+                    featureEndpointVariableElements.get(i).setVariableValue("Apache-CXF%2F3%2E3%2E12");
+                    featureEndpointVariableElements.get(i).setVariableIsInUrl(false);
+                    featureEndpointVariableElements.get(i).setVariableCombinationsEmpty(false);
+                    featureEndpointVariableElements.get(i).setVariableCombinationsMissing(false);
+                }break;
+                case 3: {
+                    featureEndpointVariableElements.get(i).setVariableForEndpoint("get_search_login_records_complex");
+                    featureEndpointVariableElements.get(i).setVariableName("channel");
+                    featureEndpointVariableElements.get(i).setVariableValue("operationconsole-agent");
+                    featureEndpointVariableElements.get(i).setVariableIsInUrl(false);
+                    featureEndpointVariableElements.get(i).setVariableCombinationsEmpty(false);
+                    featureEndpointVariableElements.get(i).setVariableCombinationsMissing(false);
+                }break;
+                case 4: {
+                    featureEndpointVariableElements.get(i).setVariableForEndpoint("get_search_login_records_complex");
+                    featureEndpointVariableElements.get(i).setVariableName("action");
+                    featureEndpointVariableElements.get(i).setVariableValue("LOGIN");
+                    featureEndpointVariableElements.get(i).setVariableIsInUrl(false);
+                    featureEndpointVariableElements.get(i).setVariableCombinationsEmpty(false);
+                    featureEndpointVariableElements.get(i).setVariableCombinationsMissing(false);
+                }break;
+                case 5: {
+                    featureEndpointVariableElements.get(i).setVariableForEndpoint("get_search_login_records_complex");
+                    featureEndpointVariableElements.get(i).setVariableName("actionStatus");
+                    featureEndpointVariableElements.get(i).setVariableValue("SUCCESS");
+                    featureEndpointVariableElements.get(i).setVariableIsInUrl(false);
+                    featureEndpointVariableElements.get(i).setVariableCombinationsEmpty(false);
+                    featureEndpointVariableElements.get(i).setVariableCombinationsMissing(false);
+                }break;
+                case 6: {
+                    featureEndpointVariableElements.get(i).setVariableForEndpoint("get_search_login_records_complex");
+                    featureEndpointVariableElements.get(i).setVariableName("limit");
+                    featureEndpointVariableElements.get(i).setVariableValue("1");
+                    featureEndpointVariableElements.get(i).setVariableIsInUrl(false);
+                    featureEndpointVariableElements.get(i).setVariableCombinationsEmpty(false);
+                    featureEndpointVariableElements.get(i).setVariableCombinationsMissing(false);
+                }break;
+                case 7: {
+                    featureEndpointVariableElements.get(i).setVariableForEndpoint("get_search_login_records_complex");
+                    featureEndpointVariableElements.get(i).setVariableName("sort");
+                    featureEndpointVariableElements.get(i).setVariableValue("asc");
+                    featureEndpointVariableElements.get(i).setVariableIsInUrl(false);
+                    featureEndpointVariableElements.get(i).setVariableCombinationsEmpty(false);
+                    featureEndpointVariableElements.get(i).setVariableCombinationsMissing(false);
+                }break;
+                case 8: {
+                    featureEndpointVariableElements.get(i).setVariableForEndpoint("get_search_login_records_simple");
+                    featureEndpointVariableElements.get(i).setVariableName("expression");
+                    featureEndpointVariableElements.get(i).setVariableValue("userId==1");
+                    featureEndpointVariableElements.get(i).setVariableIsInUrl(false);
+                    featureEndpointVariableElements.get(i).setVariableCombinationsEmpty(true);
+                    featureEndpointVariableElements.get(i).setVariableCombinationsMissing(true);
+                }break;
+                case 9: {
+                    featureEndpointVariableElements.get(i).setVariableForEndpoint("get_search_login_records_simple");
+                    featureEndpointVariableElements.get(i).setVariableName("limit");
+                    featureEndpointVariableElements.get(i).setVariableValue("1");
+                    featureEndpointVariableElements.get(i).setVariableIsInUrl(false);
+                    featureEndpointVariableElements.get(i).setVariableCombinationsEmpty(true);
+                    featureEndpointVariableElements.get(i).setVariableCombinationsMissing(true);
+                }break;
+                case 10: {
+                    featureEndpointVariableElements.get(i).setVariableForEndpoint("get_search_login_records_simple");
                     featureEndpointVariableElements.get(i).setVariableName("sort");
                     featureEndpointVariableElements.get(i).setVariableValue("asc");
                     featureEndpointVariableElements.get(i).setVariableIsInUrl(false);
                     featureEndpointVariableElements.get(i).setVariableCombinationsEmpty(true);
+                    featureEndpointVariableElements.get(i).setVariableCombinationsMissing(true);
+                }break;
+                case 11: {
+                    featureEndpointVariableElements.get(i).setVariableForEndpoint("post_sessions_for_logged_user");
+                    featureEndpointVariableElements.get(i).setVariableName("ipAddress");
+                    featureEndpointVariableElements.get(i).setVariableValue("10%2E244%2E0%2E1");
+                    featureEndpointVariableElements.get(i).setVariableIsInUrl(false);
+                    featureEndpointVariableElements.get(i).setVariableCombinationsEmpty(false);
+                    featureEndpointVariableElements.get(i).setVariableCombinationsMissing(false);
+                }break;
+                case 12: {
+                    featureEndpointVariableElements.get(i).setVariableForEndpoint("post_sessions_for_logged_user");
+                    featureEndpointVariableElements.get(i).setVariableName("agent");
+                    featureEndpointVariableElements.get(i).setVariableValue("Apache-HttpClient%2F4%2E5%2E1%20%28Java%2F1%2E8%2E0_181%29");
+                    featureEndpointVariableElements.get(i).setVariableIsInUrl(false);
+                    featureEndpointVariableElements.get(i).setVariableCombinationsEmpty(false);
+                    featureEndpointVariableElements.get(i).setVariableCombinationsMissing(false);
+                }break;
+                case 13: {
+                    featureEndpointVariableElements.get(i).setVariableForEndpoint("post_sessions_for_logged_user");
+                    featureEndpointVariableElements.get(i).setVariableName("action");
+                    featureEndpointVariableElements.get(i).setVariableValue("LOGIN");
+                    featureEndpointVariableElements.get(i).setVariableIsInUrl(false);
+                    featureEndpointVariableElements.get(i).setVariableCombinationsEmpty(false);
+                    featureEndpointVariableElements.get(i).setVariableCombinationsMissing(false);
+                }break;
+                case 14: {
+                    featureEndpointVariableElements.get(i).setVariableForEndpoint("post_sessions_for_logged_user");
+                    featureEndpointVariableElements.get(i).setVariableName("actionStatus");
+                    featureEndpointVariableElements.get(i).setVariableValue("SUCCESS");
+                    featureEndpointVariableElements.get(i).setVariableIsInUrl(false);
+                    featureEndpointVariableElements.get(i).setVariableCombinationsEmpty(false);
+                    featureEndpointVariableElements.get(i).setVariableCombinationsMissing(false);
+                }break;
+                case 15: {
+                    featureEndpointVariableElements.get(i).setVariableForEndpoint("post_sessions_for_logged_user");
+                    featureEndpointVariableElements.get(i).setVariableName("limit");
+                    featureEndpointVariableElements.get(i).setVariableValue("1");
+                    featureEndpointVariableElements.get(i).setVariableIsInUrl(false);
+                    featureEndpointVariableElements.get(i).setVariableCombinationsEmpty(false);
+                    featureEndpointVariableElements.get(i).setVariableCombinationsMissing(false);
                 }break;
                 default: {
-                    featureEndpointVariableElements.get(i).setVariableForEndpoint("get_search_for_permissions_given_a_query");
-//                    featureEndpointVariableElements.get(i).setVariableName("body");
-                    featureEndpointVariableElements.get(i).setVariableName("var" + i);
-                    featureEndpointVariableElements.get(i).setVariableValue("");
+                    featureEndpointVariableElements.get(i).setVariableForEndpoint("post_sessions_for_logged_user");
+                    featureEndpointVariableElements.get(i).setVariableName("sort");
+                    featureEndpointVariableElements.get(i).setVariableValue("asc");
                     featureEndpointVariableElements.get(i).setVariableIsInUrl(false);
-                    featureEndpointVariableElements.get(i).setVariableCombinationsEmpty(true);
+                    featureEndpointVariableElements.get(i).setVariableCombinationsEmpty(false);
+                    featureEndpointVariableElements.get(i).setVariableCombinationsMissing(false);
                 }
             }
             featureEndpointVariableElements.get(i).setVariableCombinationsInvalid(true);
-            featureEndpointVariableElements.get(i).setVariableCombinationsMissing(true);
         }
 
     }
@@ -302,7 +403,7 @@ public final class Form extends ViewElements implements
                     requestType,
                     hasInvalidUserTest,
                     validBody,
-                    validBody
+                    validHeader
             );
             endpoints.add(endpoint);
         }

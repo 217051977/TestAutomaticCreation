@@ -627,7 +627,7 @@ public class FileManager {
                         metaFileWriter.write("    steps:\n");
                         String path = "path_" + endpointFolderName;
                         paths.add(path);
-                        metaFileWriter.write("      - " + endpoint.getRequestType() + "|" + path);
+                        metaFileWriter.write("      - " + endpoint.getRequestType().toLowerCase() + "|" + path);
                     }
                 }
             }
@@ -691,79 +691,304 @@ public class FileManager {
         return dataFilePreContent;
     }
 
-    private void writeEndpointValuesLine(FileWriter metaFileWriter, List<Endpoint> endpoints, List<String> paths, List<Variable> variables) throws IOException {
-        for (Endpoint endpoint : endpoints) {
-            String endpointName = endpoint.getName();
-            for (String path : paths) {
-                if (path.contains(endpointName)) {
-                    StringBuilder endpointRemainingUrl = new StringBuilder(endpoint.getRemainingUrl());
-                    metaFileWriter.write("\n  " + path + ": ");
-                    for (Variable variable : variables) {
-                        if (variable.getForEndpoint().equals(endpointName)) {
-                            String[] remainingUrlParts = endpointRemainingUrl.toString().split(variable.getName());
-                            if (variable.getName().contains("body")) {
-                                if (!remainingUrlParts[0].equals("/")){
-                                    int lastIndexOfForwardSlash = remainingUrlParts[0].lastIndexOf('/');
-                                    if (lastIndexOfForwardSlash == remainingUrlParts[0].length() -1) {
-                                        endpointRemainingUrl = new StringBuilder(remainingUrlParts[0].substring(
-                                                0,
-                                                remainingUrlParts[0].length() - 1
-                                        ));
-                                    } else {
-                                        endpointRemainingUrl = new StringBuilder(remainingUrlParts[0]);
+    private int getLowerIndex(int i0, int i1, int i2) {
+        if (i0 < i1) {
+            return Math.min(i0, i2);
+        } else {
+            return Math.min(i1, i2);
+        }
+    }
+
+    private int getHigherIndex(int i0, int i1, int i2) {
+        if (i0 > i1) {
+            return Math.max(i0, i2);
+        } else {
+            return Math.max(i1, i2);
+        }
+    }
+
+    private String[] getRemainingUrlParts(String endpointRemainingUrl, String variableName) {
+        String[] remainingUrlParts = endpointRemainingUrl.split(variableName);
+        if (remainingUrlParts.length > 1) {
+            List<String> notToSearchList = new ArrayList<>();
+            for (int i = 1; i < remainingUrlParts.length; i++) {
+                String actualPart = remainingUrlParts[i];
+                String previousPart = remainingUrlParts[i - 1];
+                String notToSearch = "";
+                int actualPartQuestionMarkIndex = actualPart.indexOf('?');
+                int actualPartForwardSlashIndex = actualPart.indexOf('/');
+                int actualPartAndIndex = actualPart.indexOf('&');
+                int previousPartQuestionMarkIndex = previousPart.lastIndexOf('?');
+                int previousPartForwardSlashIndex = previousPart.lastIndexOf('/');
+                int previousPartAndIndex = previousPart.lastIndexOf('&');
+                int previousPartLastIndex = previousPart.length() - 1;
+                if (previousPartQuestionMarkIndex >= 0) {
+                    if (previousPartQuestionMarkIndex != previousPartLastIndex) {
+                        if (previousPartForwardSlashIndex >= 0) {
+                            if (previousPartForwardSlashIndex != previousPartLastIndex) {
+                                if (previousPartAndIndex >= 0) {
+                                    if (previousPartAndIndex != previousPartLastIndex) {
+                                        notToSearch += previousPart.substring(
+                                                getHigherIndex(
+                                                        previousPartQuestionMarkIndex,
+                                                        previousPartForwardSlashIndex,
+                                                        previousPartAndIndex
+                                                ) + 1
+                                        ) + variableName;
                                     }
                                 } else {
-                                    endpointRemainingUrl = new StringBuilder();
-                                }
-                            } else {
-                                if (path.contains("_empty_" + variable.getName())) {
-                                    if (variable.getIsInUrl()) {
-                                        endpointRemainingUrl = new StringBuilder(remainingUrlParts[0]);
-                                    } else {
-                                        endpointRemainingUrl = new StringBuilder(remainingUrlParts[0] + variable.getName() + "=");
-                                    }
-                                } else if (path.contains("_invalid_" + variable.getName())) {
-                                    if (variable.getIsInUrl()) {
-                                        endpointRemainingUrl = new StringBuilder(remainingUrlParts[0] + "asdasdasd");
-                                    } else {
-                                        endpointRemainingUrl = new StringBuilder(remainingUrlParts[0] + variable.getName() + "=asdasdasd");
-                                    }
-                                } else if (path.contains("_missing_" + variable.getName())) {
-                                    endpointRemainingUrl = new StringBuilder(remainingUrlParts[0]);
-                                    if (!variable.getIsInUrl()) {
-                                        int lastOccurrenceCommercialAndSymbol = endpointRemainingUrl.lastIndexOf("&");
-                                        if (lastOccurrenceCommercialAndSymbol == endpointRemainingUrl.length() - 1) {
-                                            endpointRemainingUrl = new StringBuilder(endpointRemainingUrl.substring(
-                                                    0,
-                                                    lastOccurrenceCommercialAndSymbol
-                                            ));
-                                        }
-                                    }
-                                } else if (path.contains("_valid_" + variable.getName())) {
-                                    if (variable.getIsInUrl()) {
-                                        endpointRemainingUrl = new StringBuilder(remainingUrlParts[0] + variable.getValue());
-                                    } else {
-                                        endpointRemainingUrl = new StringBuilder(remainingUrlParts[0] + variable.getName() + "=" + variable.getValue());
-                                    }
+                                    notToSearch += previousPart.substring(
+                                            Math.max(previousPartQuestionMarkIndex, previousPartForwardSlashIndex) + 1
+                                    ) + variableName;
                                 }
                             }
-                            if (remainingUrlParts.length > 1) {
-                                endpointRemainingUrl.append(remainingUrlParts[1]);
+                        } else {
+                            if (previousPartAndIndex >= 0) {
+                                if (previousPartAndIndex != previousPartLastIndex) {
+                                    notToSearch += previousPart.substring(
+                                            Math.max(previousPartQuestionMarkIndex, previousPartAndIndex)
+                                    ) + variableName;
+                                }
+                            } else {
+                                notToSearch += previousPart.substring(
+                                        previousPartQuestionMarkIndex
+                                ) + variableName;
                             }
                         }
                     }
-                    if (endpointRemainingUrl.toString().equals("")) {
-                        endpointRemainingUrl = new StringBuilder("/");
+                } else {
+                    if (previousPartForwardSlashIndex >= 0) {
+                        if (previousPartForwardSlashIndex != previousPartLastIndex) {
+                            if (previousPartAndIndex >= 0) {
+                                if (previousPartAndIndex != previousPartLastIndex) {
+                                    notToSearch += previousPart.substring(
+                                            Math.max(previousPartForwardSlashIndex, previousPartAndIndex)
+                                    ) + variableName;
+                                }
+                            } else {
+                                notToSearch += previousPart.substring(
+                                        previousPartForwardSlashIndex
+                                ) + variableName;
+                            }
+                        }
+                    } else {
+                        if (previousPartAndIndex >= 0) {
+                            if (previousPartAndIndex != 0) {
+                                notToSearch += previousPart.substring(
+                                        previousPartAndIndex
+                                ) + variableName;
+                            }
+                        }
                     }
-                    int lastOccurrenceQuestionMark = endpointRemainingUrl.lastIndexOf("?");
-                    if (lastOccurrenceQuestionMark == endpointRemainingUrl.length() - 1) {
-                        endpointRemainingUrl = new StringBuilder(endpointRemainingUrl.substring(
-                                0,
-                                lastOccurrenceQuestionMark
-                        ));
+                }
+                if (actualPartQuestionMarkIndex >= 0) {
+                    if (actualPartQuestionMarkIndex != 0) {
+                        if (actualPartForwardSlashIndex >= 0) {
+                            if (actualPartForwardSlashIndex != 0) {
+                                if (actualPartAndIndex >= 0) {
+                                    if (actualPartAndIndex != 0) {
+                                        notToSearch += actualPart.substring(
+                                                0,
+                                                getLowerIndex(
+                                                        actualPartQuestionMarkIndex,
+                                                        actualPartForwardSlashIndex,
+                                                        actualPartAndIndex
+                                                )
+                                        );
+                                    }
+                                } else {
+                                    notToSearch += actualPart.substring(
+                                            0,
+                                            Math.min(actualPartQuestionMarkIndex, actualPartForwardSlashIndex)
+                                    );
+                                }
+                            }
+                        } else {
+                            if (actualPartAndIndex >= 0) {
+                                if (actualPartAndIndex != 0) {
+                                    notToSearch += actualPart.substring(
+                                            0,
+                                            Math.min(actualPartQuestionMarkIndex, actualPartAndIndex)
+                                    );
+                                }
+                            } else {
+                                notToSearch += actualPart.substring(0, actualPartQuestionMarkIndex);
+                            }
+                        }
+                    }
+                } else {
+                    if (actualPartForwardSlashIndex >= 0) {
+                        if (actualPartForwardSlashIndex != 0) {
+                            if (actualPartAndIndex >= 0) {
+                                if (actualPartAndIndex != 0) {
+                                    notToSearch += actualPart.substring(
+                                            0,
+                                            Math.min(actualPartForwardSlashIndex, actualPartAndIndex)
+                                    );
+                                }
+                            } else {
+                                notToSearch += actualPart.substring(0, actualPartForwardSlashIndex);
+                            }
+                        }
+                    } else {
+                        if (actualPartAndIndex >= 0) {
+                            if (actualPartAndIndex != 0) {
+                                notToSearch += actualPart.substring(0, actualPartAndIndex);
+                            }
+                        }
+                    }
+                }
+                if (!notToSearch.equals("")) {
+                    notToSearchList.add(notToSearch);
+                }
+            }
+            List<String> remainingUrlPartsList = new ArrayList<>();
+            for (String notToSearch : notToSearchList) {
+                String[] remUrlPartsSplitByVarNameAndNotToSearchParts = endpointRemainingUrl.split(variableName +notToSearch);
+                for (String part : remUrlPartsSplitByVarNameAndNotToSearchParts) {
+                    String[] partSplitByVariableNameParts = part.split(variableName);
+                    if (partSplitByVariableNameParts.length > 1) {
+                        if (partSplitByVariableNameParts[1].equals("/") ||
+                                partSplitByVariableNameParts[1].equals("?") ||
+                                partSplitByVariableNameParts[1].equals("&")) {
+                            for (int i = 0; i < partSplitByVariableNameParts.length; i++) {
+                                if (i != 1) {
+                                    remainingUrlPartsList.add(partSplitByVariableNameParts[i]);
+                                }
+                            }
+                        }
+//                        remainingUrlPartsList.addAll(Arrays.asList(partSplitByVariableNameParts));
+                    } else {
+                        remainingUrlPartsList.add(partSplitByVariableNameParts[0]);
+                    }
+
+                }
+            }
+            if (remainingUrlPartsList.size() > 0) {
+                return remainingUrlPartsList.toArray(new String[0]);
+            } else {
+                return remainingUrlParts;
+            }
+        } else {
+            return remainingUrlParts;
+        }
+    }
+
+    private void writeEndpointValuesLine(FileWriter metaFileWriter, List<Endpoint> endpoints, List<String> paths, List<Variable> variables) throws IOException {
+//         for each endpoint
+        for (Endpoint endpoint : endpoints) {
+//            save the endpoint name
+            String endpointName = endpoint.getName();
+//            for each path
+            for (String path : paths) {
+//                if this path contains the endpoint in the name
+                if (path.contains(endpointName)) {
+//                    set a new string builder for the endpoint remaining url
+                    StringBuilder endpointRemainingUrl = new StringBuilder(endpoint.getRemainingUrl());
+//                    setup to write a new line
+                    metaFileWriter.write("\n  " + path + ": ");
+//                    for each variable
+                    for (Variable variable : variables) {
+//                        if this variable is for this endpoint
+                        if (variable.getForEndpoint().equals(endpointName)) {
+//                            check if the variable is in Url
+                            if (variable.getIsInUrl()) {
+//                                save all parts from the remaining url - split by this <</>>
+                                String[] remainingUrlParts = endpointRemainingUrl.toString().split("/");
+//                                save remainingUrlParts size
+                                int remainingUrlPartsSize = remainingUrlParts.length;
+//                                for all remainingUrlParts
+                                StringBuilder aux = new StringBuilder();
+                                for (int i = 0; i < remainingUrlPartsSize; i++) {
+                                    if (remainingUrlParts[i].equals(variable.getName())) {
+                                        for (int j = 0; j < i; j++) {
+                                            aux.append("/").append(remainingUrlParts[j]);
+                                        }
+                                        if (!variable.getName().equals("body")) {
+                                            aux.append("/").append(variable.getValue());
+                                        }
+                                        for (int j = i + 1; j < remainingUrlPartsSize; j++) {
+                                            aux.append("/").append(remainingUrlParts[j]);
+                                        }
+                                        break;
+                                    }
+                                }
+                                if (aux.toString().equals("")) {
+                                    aux = new StringBuilder("/");
+                                }
+//                                save the new endpointRemainingUrl
+                                endpointRemainingUrl = new StringBuilder(aux.toString());
+                            } else {
+//                                save all parts from the remaining url - split by this <<?>>
+                                String[] remainingUrlParts = endpointRemainingUrl.toString().split("\\?");
+//                                get the query component
+                                String queryComponent;
+                                StringBuilder aux;
+                                if (remainingUrlParts.length > 1) {
+                                    queryComponent = remainingUrlParts[1];
+                                    aux = new StringBuilder(remainingUrlParts[0] + "?");
+                                } else if (remainingUrlParts.length == 1) {
+                                    queryComponent = remainingUrlParts[0];
+                                    aux = new StringBuilder("?");
+                                } else {
+                                    continue;
+                                }
+//                                get variables
+                                String[] queryComponentParts = queryComponent.split("&");
+//                                save queryComponentParts size
+                                int queryComponentPartsSize = queryComponentParts.length;
+//                                for all queryComponentParts
+                                for (int i = 0; i < queryComponentPartsSize; i++) {
+                                    if (queryComponentParts[i].equals(variable.getName())) {
+                                        for (int j = 0; j < i; j++) {
+                                            aux.append(queryComponentParts[j]).append("&");
+                                        }
+//                                        get path components split by <<_>>
+                                        String[] pathParts = path.split("_");
+//                                        save pathParts size
+                                        int pathPartsSize = pathParts.length;
+//                                        for every pathPart
+                                        for (int k = 0; k < pathPartsSize; k++) {
+                                            if (pathParts[k].equals(variable.getName())) {
+                                                switch (pathParts[k - 1]) {
+                                                    case "empty": {
+                                                        aux.append(variable.getName()).append("=");
+                                                    } break;
+                                                    case "invalid": {
+                                                        aux.append(variable.getName()).append("=asdasdasd");
+                                                    } break;
+                                                    case "valid": {
+                                                        aux.append(variable.getName()).append("=").append(variable.getValue());
+                                                    } break;
+                                                    default: {
+                                                        if (aux.lastIndexOf("&") == aux.length() - 1) {
+                                                            aux = new StringBuilder(aux.substring(0, aux.length() - 1));
+                                                        }
+                                                    }
+                                                }
+                                                break;
+                                            }
+                                        }
+                                        for (int j = i + 1; j < queryComponentPartsSize; j++) {
+//                                            if the last char of the string is NOT an <<?>>
+                                            if (aux.lastIndexOf("?") != aux.length() - 1) {
+                                                aux.append("&").append(queryComponentParts[j]);
+                                            } else {
+                                                aux.append(queryComponentParts[j]);
+                                            }
+                                        }
+                                        break;
+                                    }
+                                }
+                                if (aux.toString().equals("?")) {
+                                    aux = new StringBuilder("/");
+                                }
+//                                save the new endpointRemainingUrl
+                                endpointRemainingUrl = new StringBuilder(aux.toString());
+                            }
+                        }
                     }
                     metaFileWriter.write(endpointRemainingUrl.toString());
-
                 }
             }
         }
@@ -796,6 +1021,13 @@ public class FileManager {
                 getSitDataFinder(featureFolderPath, sitDataFile.getPath());
             } else {
                 printMessage("Sit data file already created at: " + featureFolderPath);
+                countTimePassed.countTimePassed(System.currentTimeMillis());
+                if (testRunningCode == 0) {
+                    printMessage("\n\nCreation completed with success!");
+                } else {
+                    printMessage("\n\nTest concluded with success!");
+                }
+                Thread.currentThread().interrupt();
             }
         } catch (IOException e) {
             e.printStackTrace();

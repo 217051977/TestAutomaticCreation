@@ -13,7 +13,7 @@ public class Endpoint {
             "    \"description\": \"This is the body for this program self populating values for testing!\"\n" +
             "}";
     private String validHeaders = "accept: application/json\n" +
-            "authorization: Bearer $var_bearer_token_invalid_user\n" +
+            "authorization: Bearer $var_bearer_token\n" +
             "Content-Type: application/json";
 
     public Endpoint(){}

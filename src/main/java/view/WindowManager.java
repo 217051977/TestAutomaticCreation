@@ -12,7 +12,7 @@ import java.util.Map;
 public class WindowManager {
 
     private static final int WIDTH = 1280, HEIGHT = 680;
-    private static final String WINDOW_TITLE = "Test Automatic Creation - 2.0.0";
+    private static final String WINDOW_TITLE = "Test Automatic Creation - 2.3.0";
     private static final JFrame window = new JFrame(WINDOW_TITLE);
 
     public static void launchWindow() {
