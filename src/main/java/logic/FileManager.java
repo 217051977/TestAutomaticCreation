@@ -982,6 +982,8 @@ public class FileManager {
                                 }
                                 if (aux.toString().equals("?")) {
                                     aux = new StringBuilder("/");
+                                } else if (aux.charAt(aux.length() - 1) == '?') {
+                                    aux = new StringBuilder(aux.substring(0, aux.length() - 1));
                                 }
 //                                save the new endpointRemainingUrl
                                 endpointRemainingUrl = new StringBuilder(aux.toString());
