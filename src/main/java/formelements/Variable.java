@@ -1,5 +1,8 @@
 package formelements;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+
 public class Variable {
 
     private String forEndpoint = "endpoint_test";
@@ -33,7 +36,7 @@ public class Variable {
     ) {
         this.forEndpoint = forEndpoint;
         this.name = name;
-        this.value = value;
+        this.value = URLEncoder.encode(value, StandardCharsets.UTF_8);
         this.isInUrl = isInUrl;
         this.combinationEmpty = combinationEmpty;
         this.combinationInvalid = combinationInvalid;
