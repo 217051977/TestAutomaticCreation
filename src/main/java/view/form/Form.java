@@ -221,7 +221,7 @@ public final class Form extends ViewElements implements
                 case 1: {
                     featureEndpointVariableElements.get(i).setVariableForEndpoint("get_search_login_records_complex");
                     featureEndpointVariableElements.get(i).setVariableName("ipAddress");
-                    featureEndpointVariableElements.get(i).setVariableValue("10%2E244%2E2%2E43");
+                    featureEndpointVariableElements.get(i).setVariableValue("10.244.2.43");
                     featureEndpointVariableElements.get(i).setVariableIsInUrl(false);
                     featureEndpointVariableElements.get(i).setVariableCombinationsEmpty(false);
                     featureEndpointVariableElements.get(i).setVariableCombinationsMissing(false);
@@ -229,7 +229,7 @@ public final class Form extends ViewElements implements
                 case 2: {
                     featureEndpointVariableElements.get(i).setVariableForEndpoint("get_search_login_records_complex");
                     featureEndpointVariableElements.get(i).setVariableName("agent");
-                    featureEndpointVariableElements.get(i).setVariableValue("Apache-CXF%2F3%2E3%2E12");
+                    featureEndpointVariableElements.get(i).setVariableValue("Apache-CXF/3.3.12");
                     featureEndpointVariableElements.get(i).setVariableIsInUrl(false);
                     featureEndpointVariableElements.get(i).setVariableCombinationsEmpty(false);
                     featureEndpointVariableElements.get(i).setVariableCombinationsMissing(false);
@@ -301,7 +301,7 @@ public final class Form extends ViewElements implements
                 case 11: {
                     featureEndpointVariableElements.get(i).setVariableForEndpoint("post_sessions_for_logged_user");
                     featureEndpointVariableElements.get(i).setVariableName("ipAddress");
-                    featureEndpointVariableElements.get(i).setVariableValue("10%2E244%2E0%2E1");
+                    featureEndpointVariableElements.get(i).setVariableValue("10.244.0.1");
                     featureEndpointVariableElements.get(i).setVariableIsInUrl(false);
                     featureEndpointVariableElements.get(i).setVariableCombinationsEmpty(false);
                     featureEndpointVariableElements.get(i).setVariableCombinationsMissing(false);
@@ -309,7 +309,7 @@ public final class Form extends ViewElements implements
                 case 12: {
                     featureEndpointVariableElements.get(i).setVariableForEndpoint("post_sessions_for_logged_user");
                     featureEndpointVariableElements.get(i).setVariableName("agent");
-                    featureEndpointVariableElements.get(i).setVariableValue("Apache-HttpClient%2F4%2E5%2E1%20%28Java%2F1%2E8%2E0_181%29");
+                    featureEndpointVariableElements.get(i).setVariableValue("Apache-HttpClient/4.5.1 (Java/1.8.0_181)");
                     featureEndpointVariableElements.get(i).setVariableIsInUrl(false);
                     featureEndpointVariableElements.get(i).setVariableCombinationsEmpty(false);
                     featureEndpointVariableElements.get(i).setVariableCombinationsMissing(false);
