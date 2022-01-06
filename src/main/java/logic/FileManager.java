@@ -625,9 +625,23 @@ public class FileManager {
                     if (!metaFilePreContent.contains(endpointFolderName)) {
                         metaFileWriter.write("\n - " + endpointFolderName + ":\n");
                         metaFileWriter.write("    steps:\n");
-                        String path = "path_" + endpointFolderName;
-                        paths.add(path);
-                        metaFileWriter.write("      - " + endpoint.getRequestType().toLowerCase() + "|" + path);
+                        if (endpointFolderName.contains("but_with_expired_token")) {
+                            metaFileWriter.write(
+                                    "      - " + endpoint.getRequestType().toLowerCase() + "|" + endpointFolderName.substring(
+                                            0, endpointFolderName.indexOf("_but_with_expired_token")
+                                    )
+                            );
+                        } else if (endpointFolderName.contains("but_with_invalid_user")) {
+                            metaFileWriter.write(
+                                    "      - " + endpoint.getRequestType().toLowerCase() + "|" + endpointFolderName.substring(
+                                            0, endpointFolderName.indexOf("_but_with_invalid_user")
+                                    )
+                            );
+                        } else {
+                            String path = "path_" + endpointFolderName;
+                            paths.add(path);
+                            metaFileWriter.write("      - " + endpoint.getRequestType().toLowerCase() + "|" + path);
+                        }
                     }
                 }
             }
@@ -691,189 +705,6 @@ public class FileManager {
         return dataFilePreContent;
     }
 
-    private int getLowerIndex(int i0, int i1, int i2) {
-        if (i0 < i1) {
-            return Math.min(i0, i2);
-        } else {
-            return Math.min(i1, i2);
-        }
-    }
-
-    private int getHigherIndex(int i0, int i1, int i2) {
-        if (i0 > i1) {
-            return Math.max(i0, i2);
-        } else {
-            return Math.max(i1, i2);
-        }
-    }
-
-    private String[] getRemainingUrlParts(String endpointRemainingUrl, String variableName) {
-        String[] remainingUrlParts = endpointRemainingUrl.split(variableName);
-        if (remainingUrlParts.length > 1) {
-            List<String> notToSearchList = new ArrayList<>();
-            for (int i = 1; i < remainingUrlParts.length; i++) {
-                String actualPart = remainingUrlParts[i];
-                String previousPart = remainingUrlParts[i - 1];
-                String notToSearch = "";
-                int actualPartQuestionMarkIndex = actualPart.indexOf('?');
-                int actualPartForwardSlashIndex = actualPart.indexOf('/');
-                int actualPartAndIndex = actualPart.indexOf('&');
-                int previousPartQuestionMarkIndex = previousPart.lastIndexOf('?');
-                int previousPartForwardSlashIndex = previousPart.lastIndexOf('/');
-                int previousPartAndIndex = previousPart.lastIndexOf('&');
-                int previousPartLastIndex = previousPart.length() - 1;
-                if (previousPartQuestionMarkIndex >= 0) {
-                    if (previousPartQuestionMarkIndex != previousPartLastIndex) {
-                        if (previousPartForwardSlashIndex >= 0) {
-                            if (previousPartForwardSlashIndex != previousPartLastIndex) {
-                                if (previousPartAndIndex >= 0) {
-                                    if (previousPartAndIndex != previousPartLastIndex) {
-                                        notToSearch += previousPart.substring(
-                                                getHigherIndex(
-                                                        previousPartQuestionMarkIndex,
-                                                        previousPartForwardSlashIndex,
-                                                        previousPartAndIndex
-                                                ) + 1
-                                        ) + variableName;
-                                    }
-                                } else {
-                                    notToSearch += previousPart.substring(
-                                            Math.max(previousPartQuestionMarkIndex, previousPartForwardSlashIndex) + 1
-                                    ) + variableName;
-                                }
-                            }
-                        } else {
-                            if (previousPartAndIndex >= 0) {
-                                if (previousPartAndIndex != previousPartLastIndex) {
-                                    notToSearch += previousPart.substring(
-                                            Math.max(previousPartQuestionMarkIndex, previousPartAndIndex)
-                                    ) + variableName;
-                                }
-                            } else {
-                                notToSearch += previousPart.substring(
-                                        previousPartQuestionMarkIndex
-                                ) + variableName;
-                            }
-                        }
-                    }
-                } else {
-                    if (previousPartForwardSlashIndex >= 0) {
-                        if (previousPartForwardSlashIndex != previousPartLastIndex) {
-                            if (previousPartAndIndex >= 0) {
-                                if (previousPartAndIndex != previousPartLastIndex) {
-                                    notToSearch += previousPart.substring(
-                                            Math.max(previousPartForwardSlashIndex, previousPartAndIndex)
-                                    ) + variableName;
-                                }
-                            } else {
-                                notToSearch += previousPart.substring(
-                                        previousPartForwardSlashIndex
-                                ) + variableName;
-                            }
-                        }
-                    } else {
-                        if (previousPartAndIndex >= 0) {
-                            if (previousPartAndIndex != 0) {
-                                notToSearch += previousPart.substring(
-                                        previousPartAndIndex
-                                ) + variableName;
-                            }
-                        }
-                    }
-                }
-                if (actualPartQuestionMarkIndex >= 0) {
-                    if (actualPartQuestionMarkIndex != 0) {
-                        if (actualPartForwardSlashIndex >= 0) {
-                            if (actualPartForwardSlashIndex != 0) {
-                                if (actualPartAndIndex >= 0) {
-                                    if (actualPartAndIndex != 0) {
-                                        notToSearch += actualPart.substring(
-                                                0,
-                                                getLowerIndex(
-                                                        actualPartQuestionMarkIndex,
-                                                        actualPartForwardSlashIndex,
-                                                        actualPartAndIndex
-                                                )
-                                        );
-                                    }
-                                } else {
-                                    notToSearch += actualPart.substring(
-                                            0,
-                                            Math.min(actualPartQuestionMarkIndex, actualPartForwardSlashIndex)
-                                    );
-                                }
-                            }
-                        } else {
-                            if (actualPartAndIndex >= 0) {
-                                if (actualPartAndIndex != 0) {
-                                    notToSearch += actualPart.substring(
-                                            0,
-                                            Math.min(actualPartQuestionMarkIndex, actualPartAndIndex)
-                                    );
-                                }
-                            } else {
-                                notToSearch += actualPart.substring(0, actualPartQuestionMarkIndex);
-                            }
-                        }
-                    }
-                } else {
-                    if (actualPartForwardSlashIndex >= 0) {
-                        if (actualPartForwardSlashIndex != 0) {
-                            if (actualPartAndIndex >= 0) {
-                                if (actualPartAndIndex != 0) {
-                                    notToSearch += actualPart.substring(
-                                            0,
-                                            Math.min(actualPartForwardSlashIndex, actualPartAndIndex)
-                                    );
-                                }
-                            } else {
-                                notToSearch += actualPart.substring(0, actualPartForwardSlashIndex);
-                            }
-                        }
-                    } else {
-                        if (actualPartAndIndex >= 0) {
-                            if (actualPartAndIndex != 0) {
-                                notToSearch += actualPart.substring(0, actualPartAndIndex);
-                            }
-                        }
-                    }
-                }
-                if (!notToSearch.equals("")) {
-                    notToSearchList.add(notToSearch);
-                }
-            }
-            List<String> remainingUrlPartsList = new ArrayList<>();
-            for (String notToSearch : notToSearchList) {
-                String[] remUrlPartsSplitByVarNameAndNotToSearchParts = endpointRemainingUrl.split(variableName +notToSearch);
-                for (String part : remUrlPartsSplitByVarNameAndNotToSearchParts) {
-                    String[] partSplitByVariableNameParts = part.split(variableName);
-                    if (partSplitByVariableNameParts.length > 1) {
-                        if (partSplitByVariableNameParts[1].equals("/") ||
-                                partSplitByVariableNameParts[1].equals("?") ||
-                                partSplitByVariableNameParts[1].equals("&")) {
-                            for (int i = 0; i < partSplitByVariableNameParts.length; i++) {
-                                if (i != 1) {
-                                    remainingUrlPartsList.add(partSplitByVariableNameParts[i]);
-                                }
-                            }
-                        }
-//                        remainingUrlPartsList.addAll(Arrays.asList(partSplitByVariableNameParts));
-                    } else {
-                        remainingUrlPartsList.add(partSplitByVariableNameParts[0]);
-                    }
-
-                }
-            }
-            if (remainingUrlPartsList.size() > 0) {
-                return remainingUrlPartsList.toArray(new String[0]);
-            } else {
-                return remainingUrlParts;
-            }
-        } else {
-            return remainingUrlParts;
-        }
-    }
-
     private void writeEndpointValuesLine(FileWriter metaFileWriter, List<Endpoint> endpoints, List<String> paths, List<Variable> variables) throws IOException {
 //         for each endpoint
         for (Endpoint endpoint : endpoints) {
@@ -902,10 +733,34 @@ public class FileManager {
                                 for (int i = 0; i < remainingUrlPartsSize; i++) {
                                     if (remainingUrlParts[i].equals(variable.getName())) {
                                         for (int j = 0; j < i; j++) {
-                                            aux.append("/").append(remainingUrlParts[j]);
+                                            if (!remainingUrlParts[j].equals("")) {
+                                                aux.append("/").append(remainingUrlParts[j]);
+                                            }
                                         }
                                         if (!variable.getName().equals("body")) {
-                                            aux.append("/").append(variable.getValue());
+//                                        get path components split by <<_>>
+                                            String[] pathParts = path.split("_");
+//                                        save pathParts size
+                                            int pathPartsSize = pathParts.length;
+//                                        for every pathPart
+                                            for (int k = 0; k < pathPartsSize; k++) {
+                                                if (pathParts[k].equals(variable.getName())) {
+                                                    switch (pathParts[k - 1]) {
+                                                        case "invalid": {
+                                                            aux.append("/").append("asdasdasd");
+                                                        } break;
+                                                        case "valid": {
+                                                            aux.append("/").append(variable.getValue());
+                                                        } break;
+                                                        case "missing":
+                                                        case "empty": break;
+                                                        default: {
+                                                            continue;
+                                                        }
+                                                    }
+                                                    break;
+                                                }
+                                            }
                                         }
                                         for (int j = i + 1; j < remainingUrlPartsSize; j++) {
                                             aux.append("/").append(remainingUrlParts[j]);
@@ -957,13 +812,15 @@ public class FileManager {
                                                     case "invalid": {
                                                         aux.append(variable.getName()).append("=asdasdasd");
                                                     } break;
-                                                    case "valid": {
-                                                        aux.append(variable.getName()).append("=").append(variable.getValue());
-                                                    } break;
-                                                    default: {
+                                                    case "missing": {
                                                         if (aux.lastIndexOf("&") == aux.length() - 1) {
                                                             aux = new StringBuilder(aux.substring(0, aux.length() - 1));
                                                         }
+                                                    } break;
+                                                    case "valid": {
+                                                        aux.append(variable.getName()).append("=").append(variable.getValue());
+                                                    } default: {
+                                                        continue;
                                                     }
                                                 }
                                                 break;

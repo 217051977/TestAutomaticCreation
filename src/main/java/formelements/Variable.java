@@ -36,7 +36,15 @@ public class Variable {
     ) {
         this.forEndpoint = forEndpoint;
         this.name = name;
-        this.value = URLEncoder.encode(value, StandardCharsets.UTF_8);
+        if (value.length() > 0) {
+            if (value.charAt(0) == '$') {
+                this.value = "$" + URLEncoder.encode(value.substring(1), StandardCharsets.UTF_8);
+            } else {
+                this.value = URLEncoder.encode(value, StandardCharsets.UTF_8);
+            }
+        } else {
+            this.value = value;
+        }
         this.isInUrl = isInUrl;
         this.combinationEmpty = combinationEmpty;
         this.combinationInvalid = combinationInvalid;

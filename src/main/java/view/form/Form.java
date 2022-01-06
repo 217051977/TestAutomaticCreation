@@ -155,199 +155,412 @@ public final class Form extends ViewElements implements
         readForm();
     }
 
+    private void populateForm_addVariable(
+            int totalVarCreated,
+            String variableName,
+            String variableValue,
+            boolean variableIsInUrl,
+            boolean variableCombinationsEmpty,
+            boolean variableCombinationsMissing
+    ) {
+        featureEndpointVariableElements.get(totalVarCreated).setVariableName(variableName);
+        featureEndpointVariableElements.get(totalVarCreated).setVariableValue(variableValue);
+        featureEndpointVariableElements.get(totalVarCreated).setVariableIsInUrl(variableIsInUrl);
+        featureEndpointVariableElements.get(totalVarCreated).setVariableCombinationsEmpty(variableCombinationsEmpty);
+        featureEndpointVariableElements.get(totalVarCreated).setVariableCombinationsMissing(variableCombinationsMissing);
+        featureEndpointVariableElements.get(totalVarCreated).setVariableCombinationsInvalid(true);
+    }
+
     private void populateForm() {
         printMessage("Populating form....", 750);
         baseFolderElement.setBaseFolderPath("D:\\Users\\nb27853\\omni-qa-pluma-test");
         featureElements.forEach(
                 featureElement -> {
-                    featureElement.setFeatureFileName("cms_opc_sessions");
-                    featureElement.setFeatureName("Operation Console API - Sessions");
-                    featureElement.setFeatureBaseEndpoint("https://delivery-digitaljourney.westeurope.cloudapp.azure.com/bin/mvc.do/operationconsole/v3/sessions");
-                    featureElement.setFeatureTags("@cms @opc @session");
+                    featureElement.setFeatureFileName("cms_opc_users");
+                    featureElement.setFeatureName("Operation Console API - Users");
+                    featureElement.setFeatureBaseEndpoint("https://delivery-digitaljourney.westeurope.cloudapp.azure.com/bin/mvc.do/operationconsole/v3/users");
+                    featureElement.setFeatureTags("@cms @opc @users");
                 }
         );
-        int nEndpoints = 3;
-        if (featureEndpointElements.size() < nEndpoints) {
-            for (int i = 1; i < nEndpoints; i++) {
-                addFeatureEndpoint.doClick();
-            }
-        } else if (featureEndpointElements.size() > nEndpoints) {
+        if (featureEndpointElements.size() > 1) {
             int size = featureEndpointElements.size();
-            for (int i = 0; i < size - nEndpoints; i++){
+            for (int i = 0; i < size - 1; i++) {
                 removeFeatureEndpoint.doClick();
             }
         }
-        for (int i = 0; i < nEndpoints; i++) {
-            featureEndpointElements.get(i).setEndpointForFeature("cms_opc_sessions");
-            switch (i) {
-                case 0: {
-                    featureEndpointElements.get(i).setEndpointName("get_search_login_records_complex");
-                    featureEndpointElements.get(i).setEndpointRemainUrl("?userName&ipAddress&agent&channel&action&actionStatus&limit&sort");
-                    featureEndpointElements.get(i).setEndpointRequestType("GET");
-                }break;
-                case 1: {
-                    featureEndpointElements.get(i).setEndpointName("get_search_login_records_simple");
-                    featureEndpointElements.get(i).setEndpointRemainUrl("/search?expression&limit&sort");
-                    featureEndpointElements.get(i).setEndpointRequestType("GET");
-                }break;
-                default: {
-                    featureEndpointElements.get(i).setEndpointName("post_sessions_for_logged_user");
-                    featureEndpointElements.get(i).setEndpointRemainUrl("/mysessions?ipAddress&agent&action&actionStatus&limit&sort");
-                    featureEndpointElements.get(i).setEndpointRequestType("GET");
-                }
-            }
-        }
-        int nVar = 17;
-        if (featureEndpointVariableElements.size() < nVar) {
-            for (int i = 0; i < nVar; i++) {
-                addFeatureEndpointVariable.doClick();
-            }
-        } else if (featureEndpointVariableElements.size() > nVar) {
+        if (featureEndpointVariableElements.size() > 1) {
             int size = featureEndpointVariableElements.size();
-            for (int i = 0; i < size - nVar; i++){
+            for (int i = 0; i < size - 1; i++){
                 removeFeatureEndpointVariable.doClick();
             }
         }
-        for (int i = 0; i < nVar; i++) {
-            switch (i) {
-                case 0: {
-                    featureEndpointVariableElements.get(i).setVariableForEndpoint("get_search_login_records_complex");
-                    featureEndpointVariableElements.get(i).setVariableName("userName");
-                    featureEndpointVariableElements.get(i).setVariableValue("admin");
-                    featureEndpointVariableElements.get(i).setVariableIsInUrl(false);
-                    featureEndpointVariableElements.get(i).setVariableCombinationsEmpty(false);
-                    featureEndpointVariableElements.get(i).setVariableCombinationsMissing(false);
-                }break;
-                case 1: {
-                    featureEndpointVariableElements.get(i).setVariableForEndpoint("get_search_login_records_complex");
-                    featureEndpointVariableElements.get(i).setVariableName("ipAddress");
-                    featureEndpointVariableElements.get(i).setVariableValue("10.244.2.43");
-                    featureEndpointVariableElements.get(i).setVariableIsInUrl(false);
-                    featureEndpointVariableElements.get(i).setVariableCombinationsEmpty(false);
-                    featureEndpointVariableElements.get(i).setVariableCombinationsMissing(false);
-                }break;
-                case 2: {
-                    featureEndpointVariableElements.get(i).setVariableForEndpoint("get_search_login_records_complex");
-                    featureEndpointVariableElements.get(i).setVariableName("agent");
-                    featureEndpointVariableElements.get(i).setVariableValue("Apache-CXF/3.3.12");
-                    featureEndpointVariableElements.get(i).setVariableIsInUrl(false);
-                    featureEndpointVariableElements.get(i).setVariableCombinationsEmpty(false);
-                    featureEndpointVariableElements.get(i).setVariableCombinationsMissing(false);
-                }break;
-                case 3: {
-                    featureEndpointVariableElements.get(i).setVariableForEndpoint("get_search_login_records_complex");
-                    featureEndpointVariableElements.get(i).setVariableName("channel");
-                    featureEndpointVariableElements.get(i).setVariableValue("operationconsole-agent");
-                    featureEndpointVariableElements.get(i).setVariableIsInUrl(false);
-                    featureEndpointVariableElements.get(i).setVariableCombinationsEmpty(false);
-                    featureEndpointVariableElements.get(i).setVariableCombinationsMissing(false);
-                }break;
-                case 4: {
-                    featureEndpointVariableElements.get(i).setVariableForEndpoint("get_search_login_records_complex");
-                    featureEndpointVariableElements.get(i).setVariableName("action");
-                    featureEndpointVariableElements.get(i).setVariableValue("LOGIN");
-                    featureEndpointVariableElements.get(i).setVariableIsInUrl(false);
-                    featureEndpointVariableElements.get(i).setVariableCombinationsEmpty(false);
-                    featureEndpointVariableElements.get(i).setVariableCombinationsMissing(false);
-                }break;
-                case 5: {
-                    featureEndpointVariableElements.get(i).setVariableForEndpoint("get_search_login_records_complex");
-                    featureEndpointVariableElements.get(i).setVariableName("actionStatus");
-                    featureEndpointVariableElements.get(i).setVariableValue("SUCCESS");
-                    featureEndpointVariableElements.get(i).setVariableIsInUrl(false);
-                    featureEndpointVariableElements.get(i).setVariableCombinationsEmpty(false);
-                    featureEndpointVariableElements.get(i).setVariableCombinationsMissing(false);
-                }break;
-                case 6: {
-                    featureEndpointVariableElements.get(i).setVariableForEndpoint("get_search_login_records_complex");
-                    featureEndpointVariableElements.get(i).setVariableName("limit");
-                    featureEndpointVariableElements.get(i).setVariableValue("1");
-                    featureEndpointVariableElements.get(i).setVariableIsInUrl(false);
-                    featureEndpointVariableElements.get(i).setVariableCombinationsEmpty(false);
-                    featureEndpointVariableElements.get(i).setVariableCombinationsMissing(false);
-                }break;
-                case 7: {
-                    featureEndpointVariableElements.get(i).setVariableForEndpoint("get_search_login_records_complex");
-                    featureEndpointVariableElements.get(i).setVariableName("sort");
-                    featureEndpointVariableElements.get(i).setVariableValue("asc");
-                    featureEndpointVariableElements.get(i).setVariableIsInUrl(false);
-                    featureEndpointVariableElements.get(i).setVariableCombinationsEmpty(false);
-                    featureEndpointVariableElements.get(i).setVariableCombinationsMissing(false);
-                }break;
-                case 8: {
-                    featureEndpointVariableElements.get(i).setVariableForEndpoint("get_search_login_records_simple");
-                    featureEndpointVariableElements.get(i).setVariableName("expression");
-                    featureEndpointVariableElements.get(i).setVariableValue("userId==1");
-                    featureEndpointVariableElements.get(i).setVariableIsInUrl(false);
-                    featureEndpointVariableElements.get(i).setVariableCombinationsEmpty(true);
-                    featureEndpointVariableElements.get(i).setVariableCombinationsMissing(true);
-                }break;
-                case 9: {
-                    featureEndpointVariableElements.get(i).setVariableForEndpoint("get_search_login_records_simple");
-                    featureEndpointVariableElements.get(i).setVariableName("limit");
-                    featureEndpointVariableElements.get(i).setVariableValue("1");
-                    featureEndpointVariableElements.get(i).setVariableIsInUrl(false);
-                    featureEndpointVariableElements.get(i).setVariableCombinationsEmpty(true);
-                    featureEndpointVariableElements.get(i).setVariableCombinationsMissing(true);
-                }break;
-                case 10: {
-                    featureEndpointVariableElements.get(i).setVariableForEndpoint("get_search_login_records_simple");
-                    featureEndpointVariableElements.get(i).setVariableName("sort");
-                    featureEndpointVariableElements.get(i).setVariableValue("asc");
-                    featureEndpointVariableElements.get(i).setVariableIsInUrl(false);
-                    featureEndpointVariableElements.get(i).setVariableCombinationsEmpty(true);
-                    featureEndpointVariableElements.get(i).setVariableCombinationsMissing(true);
-                }break;
-                case 11: {
-                    featureEndpointVariableElements.get(i).setVariableForEndpoint("post_sessions_for_logged_user");
-                    featureEndpointVariableElements.get(i).setVariableName("ipAddress");
-                    featureEndpointVariableElements.get(i).setVariableValue("10.244.0.1");
-                    featureEndpointVariableElements.get(i).setVariableIsInUrl(false);
-                    featureEndpointVariableElements.get(i).setVariableCombinationsEmpty(false);
-                    featureEndpointVariableElements.get(i).setVariableCombinationsMissing(false);
-                }break;
-                case 12: {
-                    featureEndpointVariableElements.get(i).setVariableForEndpoint("post_sessions_for_logged_user");
-                    featureEndpointVariableElements.get(i).setVariableName("agent");
-                    featureEndpointVariableElements.get(i).setVariableValue("Apache-HttpClient/4.5.1 (Java/1.8.0_181)");
-                    featureEndpointVariableElements.get(i).setVariableIsInUrl(false);
-                    featureEndpointVariableElements.get(i).setVariableCombinationsEmpty(false);
-                    featureEndpointVariableElements.get(i).setVariableCombinationsMissing(false);
-                }break;
-                case 13: {
-                    featureEndpointVariableElements.get(i).setVariableForEndpoint("post_sessions_for_logged_user");
-                    featureEndpointVariableElements.get(i).setVariableName("action");
-                    featureEndpointVariableElements.get(i).setVariableValue("LOGIN");
-                    featureEndpointVariableElements.get(i).setVariableIsInUrl(false);
-                    featureEndpointVariableElements.get(i).setVariableCombinationsEmpty(false);
-                    featureEndpointVariableElements.get(i).setVariableCombinationsMissing(false);
-                }break;
-                case 14: {
-                    featureEndpointVariableElements.get(i).setVariableForEndpoint("post_sessions_for_logged_user");
-                    featureEndpointVariableElements.get(i).setVariableName("actionStatus");
-                    featureEndpointVariableElements.get(i).setVariableValue("SUCCESS");
-                    featureEndpointVariableElements.get(i).setVariableIsInUrl(false);
-                    featureEndpointVariableElements.get(i).setVariableCombinationsEmpty(false);
-                    featureEndpointVariableElements.get(i).setVariableCombinationsMissing(false);
-                }break;
-                case 15: {
-                    featureEndpointVariableElements.get(i).setVariableForEndpoint("post_sessions_for_logged_user");
-                    featureEndpointVariableElements.get(i).setVariableName("limit");
-                    featureEndpointVariableElements.get(i).setVariableValue("1");
-                    featureEndpointVariableElements.get(i).setVariableIsInUrl(false);
-                    featureEndpointVariableElements.get(i).setVariableCombinationsEmpty(false);
-                    featureEndpointVariableElements.get(i).setVariableCombinationsMissing(false);
-                }break;
-                default: {
-                    featureEndpointVariableElements.get(i).setVariableForEndpoint("post_sessions_for_logged_user");
-                    featureEndpointVariableElements.get(i).setVariableName("sort");
-                    featureEndpointVariableElements.get(i).setVariableValue("asc");
-                    featureEndpointVariableElements.get(i).setVariableIsInUrl(false);
-                    featureEndpointVariableElements.get(i).setVariableCombinationsEmpty(false);
-                    featureEndpointVariableElements.get(i).setVariableCombinationsMissing(false);
-                }
+
+        int nFeatures = 1;
+        int totalEndpointCreated = 0;
+        int totalVarCreated = 0;
+        for (int f = 0; f < nFeatures; f++) {
+            if (f != 0) {
+                addFeature.doClick();
             }
-            featureEndpointVariableElements.get(i).setVariableCombinationsInvalid(true);
+            featureElements.get(f).setFeatureFileName("cms_opc_roles");
+            featureElements.get(f).setFeatureName("Operation Console API - Roles");
+            featureElements.get(f).setFeatureBaseEndpoint("https://delivery-digitaljourney.westeurope.cloudapp.azure.com/bin/mvc.do/operationconsole/v3/roles");
+            featureElements.get(f).setFeatureTags("@cms @opc @roles");
+            int nEndpoints = 12;
+            for (int e = 0; e < nEndpoints; e++) {
+                if (e != 0) {
+                    addFeatureEndpoint.doClick();
+                }
+                switch (e) {
+                    case 0: {
+                        String endpointName = "get_search_for_a_role";
+                        featureEndpointElements.get(totalEndpointCreated).setEndpointName(endpointName);
+                        featureEndpointElements.get(totalEndpointCreated).setEndpointRemainUrl("/id");
+
+                        addFeatureEndpointVariable.doClick();
+                        populateForm_addVariable(
+                                totalVarCreated,
+                                "id",
+                                "$role_id",
+                                true,
+                                false,
+                                true
+                        );
+                        totalVarCreated++;
+                    }
+                    break;
+                    case 1: {
+                        String endpointName = "post_partially_update_a_role";
+                        featureEndpointElements.get(totalEndpointCreated).setEndpointName(endpointName);
+                        featureEndpointElements.get(totalEndpointCreated).setEndpointRemainUrl("/id/body");
+                        featureEndpointElements.get(totalEndpointCreated).setEndpointRequestType("POST");
+                        featureEndpointElements.get(totalEndpointCreated).setEndpointValidBody(
+                                "{\n" +
+                                        "  \"name\": \"cms_test_role\",\n" +
+                                        "  \"description\": {}\n" +
+                                        "}"
+                        );
+                        int nVar = 2;
+                        for (int v = 0; v < nVar; v++) {
+                            addFeatureEndpointVariable.doClick();
+                            if (v == 0) {
+                                populateForm_addVariable(
+                                        totalVarCreated,
+                                        "id",
+                                        "$role_id",
+                                        true,
+                                        false,
+                                        true
+                                );
+                            } else {
+                                populateForm_addVariable(
+                                        totalVarCreated,
+                                        "body",
+                                        "",
+                                        true,
+                                        false,
+                                        true
+                                );
+                            }
+                            totalVarCreated++;
+                        }
+                    }
+                    break;
+                    case 2: {
+                        String endpointName = "put_update_a_role";
+                        featureEndpointElements.get(totalEndpointCreated).setEndpointName(endpointName);
+                        featureEndpointElements.get(totalEndpointCreated).setEndpointRemainUrl("/id/body");
+                        featureEndpointElements.get(totalEndpointCreated).setEndpointRequestType("PUT");
+                        featureEndpointElements.get(totalEndpointCreated).setEndpointValidBody(
+                                "{\n" +
+                                        "  \"name\": \"cms_test_role\",\n" +
+                                        "  \"description\": \"role to be used in cms test - update\"\n" +
+                                        "}"
+                        );
+                        int nVar = 2;
+                        for (int v = 0; v < nVar; v++) {
+                            addFeatureEndpointVariable.doClick();
+                            if (v == 0) {
+                                populateForm_addVariable(
+                                        totalVarCreated,
+                                        "id",
+                                        "$role_id",
+                                        true,
+                                        false,
+                                        true
+                                );
+                            } else {
+                                populateForm_addVariable(
+                                        totalVarCreated,
+                                        "body",
+                                        "",
+                                        true,
+                                        false,
+                                        true
+                                );
+                            }
+                            totalVarCreated++;
+                        }
+                    }
+                    break;
+                    case 3: {
+                        String endpointName = "delete_a_role";
+                        featureEndpointElements.get(totalEndpointCreated).setEndpointName(endpointName);
+                        featureEndpointElements.get(totalEndpointCreated).setEndpointRemainUrl("/id");
+                        featureEndpointElements.get(totalEndpointCreated).setEndpointRequestType("DELETE");
+
+                        addFeatureEndpointVariable.doClick();
+                        populateForm_addVariable(
+                                totalVarCreated,
+                                "id",
+                                "$role_id",
+                                true,
+                                false,
+                                true
+                        );
+                        totalVarCreated++;
+                    }
+                    break;
+                    case 4: {
+                        String endpointName = "get_a_list_of_roles_given_a_search_parameter";
+                        featureEndpointElements.get(totalEndpointCreated).setEndpointName(endpointName);
+                        featureEndpointElements.get(totalEndpointCreated).setEndpointRemainUrl("/body");
+                        featureEndpointElements.get(totalEndpointCreated).setEndpointValidBody(
+                                "{\n" +
+                                        "  \"id\": \"$role_id\",\n" +
+                                        "  \"name\": \"$role_name\",\n" +
+                                        "  \"limit\": 1,\n" +
+                                        "  \"sort\": [\n" +
+                                        "    \"id;desc\"\n" +
+                                        "  ]\n" +
+                                        "}"
+                        );
+
+                        addFeatureEndpointVariable.doClick();
+                        populateForm_addVariable(
+                                totalVarCreated,
+                                "body",
+                                "",
+                                true,
+                                false,
+                                true
+                        );
+                        totalVarCreated++;
+                    }
+                    break;
+                    case 5: {
+                        String endpointName = "create_a_role";
+                        featureEndpointElements.get(totalEndpointCreated).setEndpointName(endpointName);
+                        featureEndpointElements.get(totalEndpointCreated).setEndpointRemainUrl("/body");
+                        featureEndpointElements.get(totalEndpointCreated).setEndpointRequestType("POST");
+                        featureEndpointElements.get(totalEndpointCreated).setEndpointValidBody(
+                                "{\n" +
+                                        "  \"name\": \"cms_test_role\",\n" +
+                                        "  \"description\": \"role to be used in cms test - update\"\n" +
+                                        "}"
+                        );
+
+                        addFeatureEndpointVariable.doClick();
+                        populateForm_addVariable(
+                                totalVarCreated,
+                                "body",
+                                "",
+                                true,
+                                false,
+                                true
+                        );
+                        totalVarCreated++;
+                    }
+                    break;
+                    case 6: {
+                        String endpointName = "delete_a_role_by_name";
+                        featureEndpointElements.get(totalEndpointCreated).setEndpointName(endpointName);
+                        featureEndpointElements.get(totalEndpointCreated).setEndpointRemainUrl("?name");
+                        featureEndpointElements.get(totalEndpointCreated).setEndpointRequestType("DELETE");
+
+                        addFeatureEndpointVariable.doClick();
+                        populateForm_addVariable(
+                                totalVarCreated,
+                                "name",
+                                "$role_name",
+                                false,
+                                false,
+                                true
+                        );
+                        totalVarCreated++;
+                    }
+                    break;
+                    case 7: {
+                        String endpointName = "get_the_permissions_of_a_role";
+                        featureEndpointElements.get(totalEndpointCreated).setEndpointName(endpointName);
+                        featureEndpointElements.get(totalEndpointCreated).setEndpointRemainUrl("/roleId/permissions?limit&sort");
+                        int nVar = 3;
+                        for (int v = 0; v < nVar; v++) {
+                            addFeatureEndpointVariable.doClick();
+                            switch (v) {
+                                case 0: {
+                                    populateForm_addVariable(
+                                            totalVarCreated,
+                                            "roleId",
+                                            "$role_id",
+                                            true,
+                                            false,
+                                            true
+                                    );
+                                }
+                                break;
+                                case 1: {
+                                    populateForm_addVariable(
+                                            totalVarCreated,
+                                            "limit",
+                                            "1",
+                                            false,
+                                            false,
+                                            true
+                                    );
+                                }
+                                break;
+                                default: {
+                                    populateForm_addVariable(
+                                            totalVarCreated,
+                                            "sort",
+                                            "id;asc",
+                                            false,
+                                            false,
+                                            true
+                                    );
+                                }
+                            }
+                            totalVarCreated++;
+                        }
+                    }
+                    break;
+                    case 8: {
+                        String endpointName = "remove_all_permissions_of_a_role";
+                        featureEndpointElements.get(totalEndpointCreated).setEndpointName(endpointName);
+                        featureEndpointElements.get(totalEndpointCreated).setEndpointRemainUrl("/roleId/permissions");
+                        featureEndpointElements.get(totalEndpointCreated).setEndpointRequestType("DELETE");
+
+                        addFeatureEndpointVariable.doClick();
+                        populateForm_addVariable(
+                                totalVarCreated,
+                                "roleId",
+                                "$role_id",
+                                true,
+                                false,
+                                true
+                        );
+                        totalVarCreated++;
+                    }
+                    break;
+                    case 9: {
+                        String endpointName = "post_associates_a_permissions_to_a_role";
+                        featureEndpointElements.get(totalEndpointCreated).setEndpointName(endpointName);
+                        featureEndpointElements.get(totalEndpointCreated).setEndpointRemainUrl("/roleId/permissions/permissionId");
+                        int nVar = 2;
+                        for (int v = 0; v < nVar; v++) {
+                            addFeatureEndpointVariable.doClick();
+                            if (v == 0) {
+                                populateForm_addVariable(
+                                        totalVarCreated,
+                                        "roleId",
+                                        "$role_id",
+                                        true,
+                                        false,
+                                        true
+                                );
+                            } else {
+                                populateForm_addVariable(
+                                        totalVarCreated,
+                                        "permissionId",
+                                        "1",
+                                        true,
+                                        false,
+                                        true
+                                );
+                            }
+                            totalVarCreated++;
+                        }
+                    }
+                    break;
+                    case 10: {
+                        String endpointName = "remove_a_permissions_from_a_role";
+                        featureEndpointElements.get(totalEndpointCreated).setEndpointName(endpointName);
+                        featureEndpointElements.get(totalEndpointCreated).setEndpointRemainUrl("/roleId/permissions/permissionId");
+                        featureEndpointElements.get(totalEndpointCreated).setEndpointRequestType("DELETE");
+                        int nVar = 2;
+                        for (int v = 0; v < nVar; v++) {
+                            addFeatureEndpointVariable.doClick();
+                            if (v == 0) {
+                                populateForm_addVariable(
+                                        totalVarCreated,
+                                        "roleId",
+                                        "$role_id",
+                                        true,
+                                        false,
+                                        true
+                                );
+                            } else {
+                                populateForm_addVariable(
+                                        totalVarCreated,
+                                        "permissionId",
+                                        "1",
+                                        true,
+                                        false,
+                                        true
+                                );
+                            }
+                            totalVarCreated++;
+                        }
+                    }
+                    break;
+                    default: {
+                        String endpointName = "get_list_of_a_roles_given_a_search_query";
+                        featureEndpointElements.get(totalEndpointCreated).setEndpointName(endpointName);
+                        featureEndpointElements.get(totalEndpointCreated).setEndpointRemainUrl("/query?expression&limit&sort");
+                        int nVar = 3;
+                        for (int v = 0; v < nVar; v++) {
+                            addFeatureEndpointVariable.doClick();
+                            switch (v) {
+                                case 0: {
+                                    populateForm_addVariable(
+                                            totalVarCreated,
+                                            "expression",
+                                            "id!=1",
+                                            true,
+                                            false,
+                                            true
+                                    );
+                                }
+                                break;
+                                case 1: {
+                                    populateForm_addVariable(
+                                            totalVarCreated,
+                                            "limit",
+                                            "2",
+                                            false,
+                                            false,
+                                            true
+                                    );
+                                }
+                                break;
+                                default: {
+                                    populateForm_addVariable(
+                                            totalVarCreated,
+                                            "sort",
+                                            "id;asc",
+                                            false,
+                                            false,
+                                            true
+                                    );
+                                }
+                            }
+                            totalVarCreated++;
+                        }
+                    }
+                }
+                totalEndpointCreated++;
+            }
         }
 
     }
