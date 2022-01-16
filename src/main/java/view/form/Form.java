@@ -161,14 +161,15 @@ public final class Form extends ViewElements implements
             String variableValue,
             boolean variableIsInUrl,
             boolean variableCombinationsEmpty,
-            boolean variableCombinationsMissing
+            boolean variableCombinationsMissing,
+            boolean variableCombinationsInvalid
     ) {
         featureEndpointVariableElements.get(totalVarCreated).setVariableName(variableName);
         featureEndpointVariableElements.get(totalVarCreated).setVariableValue(variableValue);
         featureEndpointVariableElements.get(totalVarCreated).setVariableIsInUrl(variableIsInUrl);
         featureEndpointVariableElements.get(totalVarCreated).setVariableCombinationsEmpty(variableCombinationsEmpty);
         featureEndpointVariableElements.get(totalVarCreated).setVariableCombinationsMissing(variableCombinationsMissing);
-        featureEndpointVariableElements.get(totalVarCreated).setVariableCombinationsInvalid(true);
+        featureEndpointVariableElements.get(totalVarCreated).setVariableCombinationsInvalid(variableCombinationsInvalid);
     }
 
     private void populateForm() {
@@ -224,8 +225,8 @@ public final class Form extends ViewElements implements
                                 "$role_id",
                                 true,
                                 false,
-                                true
-                        );
+                                true,
+                                true);
                         totalVarCreated++;
                     }
                     break;
@@ -250,17 +251,17 @@ public final class Form extends ViewElements implements
                                         "$role_id",
                                         true,
                                         false,
-                                        true
-                                );
+                                        true,
+                                        true);
                             } else {
                                 populateForm_addVariable(
                                         totalVarCreated,
                                         "body",
                                         "",
                                         true,
-                                        false,
-                                        true
-                                );
+                                        true,
+                                        true,
+                                        true);
                             }
                             totalVarCreated++;
                         }
@@ -287,17 +288,17 @@ public final class Form extends ViewElements implements
                                         "$role_id",
                                         true,
                                         false,
-                                        true
-                                );
+                                        true,
+                                        true);
                             } else {
                                 populateForm_addVariable(
                                         totalVarCreated,
                                         "body",
                                         "",
                                         true,
-                                        false,
-                                        true
-                                );
+                                        true,
+                                        true,
+                                        true);
                             }
                             totalVarCreated++;
                         }
@@ -316,13 +317,13 @@ public final class Form extends ViewElements implements
                                 "$role_id",
                                 true,
                                 false,
-                                true
-                        );
+                                true,
+                                true);
                         totalVarCreated++;
                     }
                     break;
                     case 4: {
-                        String endpointName = "get_a_list_of_roles_given_a_search_parameter";
+                        String endpointName = "get_list_of_roles_given_a_search_parameter";
                         featureEndpointElements.get(totalEndpointCreated).setEndpointName(endpointName);
                         featureEndpointElements.get(totalEndpointCreated).setEndpointRemainUrl("/body");
                         featureEndpointElements.get(totalEndpointCreated).setEndpointValidBody(
@@ -342,9 +343,9 @@ public final class Form extends ViewElements implements
                                 "body",
                                 "",
                                 true,
-                                false,
-                                true
-                        );
+                                true,
+                                true,
+                                true);
                         totalVarCreated++;
                     }
                     break;
@@ -366,9 +367,9 @@ public final class Form extends ViewElements implements
                                 "body",
                                 "",
                                 true,
-                                false,
-                                true
-                        );
+                                true,
+                                true,
+                                true);
                         totalVarCreated++;
                     }
                     break;
@@ -385,8 +386,8 @@ public final class Form extends ViewElements implements
                                 "$role_name",
                                 false,
                                 false,
-                                true
-                        );
+                                true,
+                                true);
                         totalVarCreated++;
                     }
                     break;
@@ -405,8 +406,8 @@ public final class Form extends ViewElements implements
                                             "$role_id",
                                             true,
                                             false,
-                                            true
-                                    );
+                                            true,
+                                            true);
                                 }
                                 break;
                                 case 1: {
@@ -416,8 +417,8 @@ public final class Form extends ViewElements implements
                                             "1",
                                             false,
                                             false,
-                                            true
-                                    );
+                                            true,
+                                            true);
                                 }
                                 break;
                                 default: {
@@ -427,8 +428,8 @@ public final class Form extends ViewElements implements
                                             "id;asc",
                                             false,
                                             false,
-                                            true
-                                    );
+                                            true,
+                                            true);
                                 }
                             }
                             totalVarCreated++;
@@ -448,8 +449,8 @@ public final class Form extends ViewElements implements
                                 "$role_id",
                                 true,
                                 false,
-                                true
-                        );
+                                true,
+                                true);
                         totalVarCreated++;
                     }
                     break;
@@ -467,8 +468,8 @@ public final class Form extends ViewElements implements
                                         "$role_id",
                                         true,
                                         false,
-                                        true
-                                );
+                                        true,
+                                        true);
                             } else {
                                 populateForm_addVariable(
                                         totalVarCreated,
@@ -476,8 +477,8 @@ public final class Form extends ViewElements implements
                                         "1",
                                         true,
                                         false,
-                                        true
-                                );
+                                        true,
+                                        true);
                             }
                             totalVarCreated++;
                         }
@@ -498,8 +499,8 @@ public final class Form extends ViewElements implements
                                         "$role_id",
                                         true,
                                         false,
-                                        true
-                                );
+                                        true,
+                                        true);
                             } else {
                                 populateForm_addVariable(
                                         totalVarCreated,
@@ -507,8 +508,8 @@ public final class Form extends ViewElements implements
                                         "1",
                                         true,
                                         false,
-                                        true
-                                );
+                                        true,
+                                        true);
                             }
                             totalVarCreated++;
                         }
@@ -527,10 +528,10 @@ public final class Form extends ViewElements implements
                                             totalVarCreated,
                                             "expression",
                                             "id!=1",
-                                            true,
                                             false,
-                                            true
-                                    );
+                                            false,
+                                            true,
+                                            true);
                                 }
                                 break;
                                 case 1: {
@@ -540,8 +541,8 @@ public final class Form extends ViewElements implements
                                             "2",
                                             false,
                                             false,
-                                            true
-                                    );
+                                            true,
+                                            true);
                                 }
                                 break;
                                 default: {
@@ -551,8 +552,8 @@ public final class Form extends ViewElements implements
                                             "id;asc",
                                             false,
                                             false,
-                                            true
-                                    );
+                                            true,
+                                            true);
                                 }
                             }
                             totalVarCreated++;

@@ -233,7 +233,7 @@ public class EndpointFolderCreationManager {
 
     private String setupHeaders(String folderName, String headers) {
         if (folderName.contains("_but_with_invalid_user")) {
-            headers += "_invalid_user";
+            headers = headers.replace("$var_bearer_token", "$var_bearer_token_invalid_user");
         }
         return headers;
     }

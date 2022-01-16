@@ -303,11 +303,6 @@ public class FileManager {
                     0
             );
         }
-//        startThreads(threads);
-//        endpointFolderCreator(
-//                featureFolderPath,
-//                newFolderName + "_but_with_expired_token"
-//        );
         Thread thread = new Thread(
                 () -> {
                     if (checkIfEveryThreadIsDone(threads, 1)) {
@@ -425,20 +420,6 @@ public class FileManager {
                                     finalNewFolderName
                             )
                     );
-//                    Thread thread = new Thread(
-//                            () -> new EndpointFolderCreationManager(
-//                                    printMessage,
-//                                    endpoints
-//                            ).endpointFolderCreator(
-//                                    featureFolderPath,
-//                                    finalNewFolderName
-//                            )
-//                    );
-//                    thread.setName("Thread_" + finalNewFolderName);
-//                    startThread(thread, 1);
-//                    threads.add(thread);
-//                    System.out.println(threads.size());
-//                    System.out.println(thread.getName());
                 }
             }
         } else {
@@ -453,15 +434,6 @@ public class FileManager {
                             finalNewFolderName
                     )
             );
-//            new Thread(
-//                    () -> new EndpointFolderCreationManager(
-//                            printMessage,
-//                            endpoints
-//                    ).endpointFolderCreator(
-//                            featureFolderPath,
-//                            finalNewFolderName
-//                    )
-//            );
         }
 
 
@@ -496,19 +468,6 @@ public class FileManager {
                         finalNewFolderName
                 )
         );
-//        new Thread(
-//                () -> new EndpointFolderCreationManager(
-//                        printMessage,
-//                        endpoints
-//                ).endpointFolderCreator(
-//                        featureFolderPath,
-//                        finalNewFolderName
-//                )
-//        );
-
-//        for (int i = 0; i < endpointFolderCreationManagersSize; i++) {
-//
-//        }
 
     }
 
@@ -625,23 +584,22 @@ public class FileManager {
                     if (!metaFilePreContent.contains(endpointFolderName)) {
                         metaFileWriter.write("\n - " + endpointFolderName + ":\n");
                         metaFileWriter.write("    steps:\n");
+                        String path = "path_";
                         if (endpointFolderName.contains("but_with_expired_token")) {
-                            metaFileWriter.write(
-                                    "      - " + endpoint.getRequestType().toLowerCase() + "|" + endpointFolderName.substring(
-                                            0, endpointFolderName.indexOf("_but_with_expired_token")
-                                    )
+                            path += endpointFolderName.substring(
+                                    0,
+                                    endpointFolderName.indexOf("_but_with_expired_token")
                             );
                         } else if (endpointFolderName.contains("but_with_invalid_user")) {
-                            metaFileWriter.write(
-                                    "      - " + endpoint.getRequestType().toLowerCase() + "|" + endpointFolderName.substring(
-                                            0, endpointFolderName.indexOf("_but_with_invalid_user")
-                                    )
+                            path += endpointFolderName.substring(
+                                    0,
+                                    endpointFolderName.indexOf("_but_with_invalid_user")
                             );
                         } else {
-                            String path = "path_" + endpointFolderName;
+                            path += endpointFolderName;
                             paths.add(path);
-                            metaFileWriter.write("      - " + endpoint.getRequestType().toLowerCase() + "|" + path);
                         }
+                        metaFileWriter.write("      - " + endpoint.getRequestType().toLowerCase() + "|" + path);
                     }
                 }
             }
