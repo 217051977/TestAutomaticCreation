@@ -228,8 +228,7 @@ public class FileManager {
                 );
                 getFeatureFolderFinder(featureFolder.getPath(), false);
             } else {
-                failToCreateFolderResponse(
-                );
+                failToCreateFolderResponse();
             }
         }
     }
@@ -281,19 +280,11 @@ public class FileManager {
                         }
                         endpointFolderCreationManagersToLaunch.add(endpointFolderCreationManagers.get(j));
                     }
-                    launchThread(
-                            endpointFolderCreationManagersToLaunch,
-                            threads,
-                            i
-                    );
+                    launchThread(endpointFolderCreationManagersToLaunch, threads, i);
                     endpointFolderCreationManagers.removeAll(endpointFolderCreationManagersToLaunch);
                 } else {
                     endpointFolderCreationManagers.get(endpointFolderCreationManagers.size() - 1).setLastOne();
-                    launchThread(
-                            endpointFolderCreationManagers,
-                            threads,
-                            i
-                    );
+                    launchThread(endpointFolderCreationManagers, threads, i);
                 }
             }
         } else {
@@ -448,15 +439,6 @@ public class FileManager {
                             finalNewFolderName
                     )
             );
-//            new Thread(
-//                    () -> new EndpointFolderCreationManager(
-//                            printMessage,
-//                            endpoints
-//                    ).endpointFolderCreator(
-//                            featureFolderPath,
-//                            finalNewFolderName
-//                    )
-//            );
         }
         String finalNewFolderName = newFolderName + "_but_with_expired_token";
         printMessage("Creating endpoint folder " + finalNewFolderName.toUpperCase() + "...");

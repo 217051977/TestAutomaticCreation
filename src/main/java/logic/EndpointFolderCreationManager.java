@@ -107,26 +107,11 @@ public class EndpointFolderCreationManager {
                         if (bodyCombination != -1 && bodyCombination != 0) {
                             printMessage("Creating body file to endpoint " + folderName.toUpperCase() + " at: " + endpointFolderPath);
                             if (bodyCombination == 1) {
-                                getEndpointBodyCreator(
-                                        endpointFolderPath,
-                                        folderName,
-                                        "{}",
-                                        endpoint.getValidHeaders()
-                                );
+                                getEndpointBodyCreator(endpointFolderPath, folderName, "{}", endpoint.getValidHeaders());
                             } else if (bodyCombination == 2) {
-                                getEndpointBodyCreator(
-                                        endpointFolderPath,
-                                        folderName,
-                                        "{\n    \"asdasdasd\": \"asdasdasd\"\n}",
-                                        endpoint.getValidHeaders()
-                                );
+                                getEndpointBodyCreator(endpointFolderPath, folderName, "{\n    \"asdasdasd\": \"asdasdasd\"\n}", endpoint.getValidHeaders());
                             } else if (bodyCombination == 3) {
-                                getEndpointBodyCreator(
-                                        endpointFolderPath,
-                                        folderName,
-                                        endpoint.getValidBody(),
-                                        endpoint.getValidHeaders()
-                                );
+                                getEndpointBodyCreator(endpointFolderPath, folderName, endpoint.getValidBody(), endpoint.getValidHeaders());
                             }
                         } else {
                             printMessage("Creating headers file to endpoint " + folderName.toUpperCase() + " at: " + endpointFolderPath);
@@ -152,10 +137,7 @@ public class EndpointFolderCreationManager {
     private int getBodyCombination(String name) {
         if (name.contains("_body")) {
             String[] namePartsSplitByBody = name.split("_body");
-//        if (namePartsSplitByBody.length > 0) {
-//            String namePart0SplitByBody = name.split("_body")[0];
             String namePart0SplitByBody = namePartsSplitByBody[0];
-//            String[] namePart0SplitByBodyAndUnderscore = name.split("_body")[0].split("_");
             String[] namePart0SplitByBodyAndUnderscore = namePart0SplitByBody.split("_");
 
             for (int i = namePart0SplitByBodyAndUnderscore.length - 1; i >= 0; i--) {
