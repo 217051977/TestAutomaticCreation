@@ -46,24 +46,24 @@ public final class Form extends ViewElements implements
 
 
     private final JButton addFeature = getViewButtonIcon(
-            new ImageIcon("src/main/resources/addFeatureButton.png")
+            new ImageIcon(ClassLoader.getSystemResource("addFeatureButton.png"))
     );
     private final JButton removeFeature = getViewButtonIcon(
-            new ImageIcon("src/main/resources/removeElement.png")
+            new ImageIcon(ClassLoader.getSystemResource("removeElement.png"))
     );
     private final JLabel featureLabel = getViewLabel("FEATURE");
     private final JButton addFeatureEndpoint = getViewButtonIcon(
-            new ImageIcon("src/main/resources/addEndpointButton.png")
+            new ImageIcon(ClassLoader.getSystemResource("addEndpointButton.png"))
     );
     private final JButton removeFeatureEndpoint = getViewButtonIcon(
-            new ImageIcon("src/main/resources/removeElement.png")
+            new ImageIcon(ClassLoader.getSystemResource("removeElement.png"))
     );
     private final JLabel featureEndpointLabel = getViewLabel("ENDPOINT");
     private final JButton addFeatureEndpointVariable = getViewButtonIcon(
-            new ImageIcon("src/main/resources/addVariableButton.png")
+            new ImageIcon(ClassLoader.getSystemResource("addVariableButton.png"))
     );
     private final JButton removeFeatureEndpointVariable = getViewButtonIcon(
-            new ImageIcon("src/main/resources/removeElement.png")
+            new ImageIcon(ClassLoader.getSystemResource("removeElement.png"))
     );
     private final JLabel featureEndpointVariableLabel = getViewLabel("VARIABLE");
 
